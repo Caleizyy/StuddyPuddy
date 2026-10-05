@@ -93,6 +93,18 @@ Konkretaus įvesties pavyzdys:
 Matematikos egzaminas – kategorija „Egzaminas“, liko 4 dienos, reikia išmokti 6 temas, numatomas mokymosi laikas – 8 valandos.
 Programavimo laboratorinis darbas – kategorija „Laboratorinis“, liko 2 dienos, numatomas atlikimo laikas – 3 valandos.
 
+_Tiksli prioriteto skaičiavimo taisyklė_
+
+Kiekvienai neužbaigtai užduočiai bus apskaičiuojamas prioriteto balas:
+
+Prioriteto balas = (reikalingas atlikimo laikas / turimas mokymosi laikas iki termino) x (1 / likusių dienų skaičius)
+
+Kuo didesnis gautas prioriteto balas, tuo aukštesnis užduoties prioritetas. Tokiu būdu atsižvelgiama ir į terminų artumą, ir į tai, ar užduočiai atlikti reikės didelės dalies turimo laiko.
+
+Jeigu iki termino mokymosi laiko nėra arba jis lygus 0, užduotis laikoma rizikinga ir jai suteikiamas maksimalus prioritetas bei parodomas įspėjimas.
+
+**Vienodų prioritetų sprendimo taisyklė:** Jeigu dviejų užduočių prioriteto balai yra vienodi, pirmiausia pasirenkama užduotis, kurios terminas yra ankstesnis. Jeigu terminai sutampa, pirmiausia pasirenkama užduotis, kuriai reikia daugiau atlikimo laiko. Jeigu sutampa ir atlikimo laikas, pirmiau pasirenkama anksčiau sukurta užduotis
+
 **Išvestis:** Modulis pateiks:
 
 - surikiuotą neužbaigtų užduočių sąrašą pagal prioritetą;
@@ -115,32 +127,34 @@ Jeigu studentas pažymi programavimo laboratorinį darbą kaip atliktą, ši už
 1. Naudotojas įveda arba atnaujina mokymosi užduotis.
 2. Sistema patikrina, ar visi būtini duomenys yra tinkami.
 3. Sistema patikrina kiekvienos užduoties atlikimo būseną.
-4. Kiekvienai neužbaigtai užduočiai apskaičiuojamas laikas iki termino.
-5. Įvertinamas užduoties darbo kiekis pagal numatomą atlikimo laiką ir modulių skaičių.
-6. Pagal nustatytas taisykles apskaičiuojamas užduoties prioritetas.
-7. Užduotys surikiuojamos pagal prioritetą.
-8. Sistema patikrina naudotojo turimą mokymosi laiką.
-9. Turimas laikas paskirstomas aukštesnio prioriteto užduotims.
-10. Sistema sugeneruoja rekomenduojamą mokymosi planą.
-11. Jei naudotojas pakeičia užduoties duomenis arba jos būseną, sistema perskaičiuoja susijusius prioritetus ir mokymosi planą.
-12. Jei visų užduočių iki terminų atlikti neįmanoma, naudotojui pateikiamas įspėjimas.
+4. Užbaigtos užduotys pašalinamos iš būsimo mokymosi plano.
+5. Kiekvienai neužbaigtai užduočiai apskaičiuojamas laikas iki termino.
+6. Apskaičiuojamas naudotojo turimas mokymosi laikas iki kiekvienos užduoties termino
+7. Pagal nustatytą formulę apskaičiuojamas kiekvienos užduoties prioriteto balas.
+8. Užduotys surikiuojamos pagal prioritetą.
+9. Jei prioritetai vienodi, taikoma vienodų prioritetų sprendimo taisyklė.
+10. Turimas laikas paskirstomas aukštesnio prioriteto užduotims.
+11. Sistema užtikrina, kad konkrečią dieną nebūtų viršytas naudotojo nurodytas maksimalus mokymosi laikas.
+12. Sistema sugeneruoja rekomenduojamą mokymosi planą.
+13. Jei naudotojas pakeičia užduoties duomenis arba jos būseną, sistema perskaičiuoja prioritetus ir mokymosi planą.
+14. Jei visų užduočių iki terminų atlikti neįmanoma, naudotojui pateikiamas įspėjimas.
 
 ### Taisyklės arba sprendimo žingsniai
 
-1. Skubumo taisyklė - Kuo mažiau laiko liko iki užduoties termino, tuo didesnis užduoties prioritetas. Užduotis, kurios terminas yra rytoj, turi būti vertinama kaip skubesnė už užduotį, kurios terminas yra po savaitės, jei kitų parametrų skirtumas nėra pakankamas prioritetui pakeisti.
-2. Darbo apimties taisyklė - Vertinant užduoties prioritetą atsižvelgiama į numatomą atlikimo laiką. Didesnės trukmės užduotis turi būti pradėta anksčiau, kad visas reikalingas laikas būtų paskirstytas iki termino.
+1. Prioriteto balo taisyklė - prioritetas apskaičiuojamas pagal nustatytą formulę, kuri įvertina užduoties atlikimo laiką, iki termino turimą mokymosi laiką ir likusių dienų skaičių.
+2. Vienodų prioritetų taisyklė - jei prioriteto balai sutampa, pirmiausia pasirenkama užduotis su ankstesniu terminu. Jei terminai sutampa, pasirenkama ilgesnė užduotis, o jei sutampa ir trukmė – anksčiau sukurta užduotis.
 3. Nepakankamo laiko taisyklė - Jeigu iki užduoties termino likęs naudotojo laisvas mokymosi laikas yra mažesnis už užduočiai reikalingą laiką, sistema turi pažymėti užduotį kaip rizikingą ir parodyti įspėjimą.
 4. Plano paskirstymo taisyklė - Sistema pirmiausia skiria turimą mokymosi laiką aukštesnio prioriteto užduotims, tačiau turi užtikrinti, kad nebūtų viršytas konkrečiai dienai naudotojo nurodytas mokymosi laikas.
 5. Atliktos užduoties taisyklė – atlikta / atsiskaityta užduotis neturi būti įtraukiama į būsimą mokymosi planą. Pasikeitus užduoties būsenai, likusių užduočių planas turi būti perskaičiuojamas.
 
 ### Scenarijai būsimiems testams
 
-| Scenarijus                        | Pradinės sąlygos ir konkreti įvestis                                                                                                                                                                              | Veiksmas                                                | Tikslus laukiamas rezultatas                                                                                                                                                                |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Įprastas atvejis                  | Yra 3 užduotys: programavimo laboratorinis – terminas po 2 dienų, 3 val.; matematikos egzaminas – po 5 dienų, 6 val.; istorijos namų darbas – po 7 dienų, 2 val. Naudotojas turi 2 val. mokymosi laiko per dieną. | Naudotojas paleidžia plano sudarymą.                    | Sistema apskaičiuoja prioritetus, laboratoriniam darbui suteikia didesnį prioritetą dėl artimesnio termino, o mokymosi laiką paskirsto taip, kad užduotys būtų atliekamos iki jų terminų.   |
-| Ribinis atvejis arba konfliktas   | Dvi užduotys turi tą patį terminą. Pirma užduotis trunka 1 val., antra – 8 val. Naudotojas turi tik 4 val. mokymosi laiko iki termino.                                                                            | Naudotojas paleidžia plano sudarymą.                    | Sistema turi nustatyti, kad iki termino viso darbo atlikti nepakanka laiko, aukštesnį prioritetą skirti skubesnei / didesnės rizikos užduočiai ir parodyti įspėjimą apie nepakankamą laiką. |
-| Klaida arba neįmanomas rezultatas | Užduotis neturi galutinio termino arba numatomas atlikimo laikas yra 0 val. / neigiamas.                                                                                                                          | Naudotojas bando išsaugoti užduotį arba sudaryti planą. | Sistema neleidžia naudoti netinkamų duomenų planavimui ir parodo aiškų klaidos pranešimą, nurodantį, kokį lauką reikia pataisyti.                                                           |
-| Užduoties būsenos pakeitimas      | Yra 3 neužbaigtos užduotys, sudarytas mokymosi planas. Naudotojas vieną užduotį pažymi kaip atliktą.                                                                                                              | Naudotojas pakeičia užduoties būseną į „Atlikta“.       | Atlikta užduotis pašalinama iš būsimo plano, o sistema perskaičiuoja likusių užduočių mokymosi planą.                                                                                       |
+| Scenarijus                        | Pradinės sąlygos ir konkreti įvestis                                                                                                                                                                              | Veiksmas                                                | Tikslus laukiamas rezultatas                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Įprastas atvejis                  | Yra 3 užduotys: programavimo laboratorinis – terminas po 2 dienų, 3 val.; matematikos egzaminas – po 5 dienų, 6 val.; istorijos namų darbas – po 7 dienų, 2 val. Naudotojas turi 2 val. mokymosi laiko per dieną. | Naudotojas paleidžia plano sudarymą.                    | Sistema apskaičiuoja prioritetus, laboratoriniam darbui suteikia didesnį prioritetą dėl artimesnio termino, o mokymosi laiką paskirsto taip, kad užduotys būtų atliekamos iki jų terminų.                                                                                                                          |
+| Ribinis atvejis arba konfliktas   | Dvi užduotys turi tą patį terminą. Pirma užduotis trunka 1 val., antra – 8 val. Naudotojas turi tik 4 val. mokymosi laiko iki termino.                                                                            | Naudotojas paleidžia plano sudarymą.                    | 1 val. užduoties prioriteto rizikos dalis: 1 / 4 = 0,25. 8 val. užduoties rizikos dalis: 8 / 4 = 2,00, todėl 8 val. užduotis turi aukštesnį prioritetą. Iki termino: 4 val. skiriamos 8 val. užduočiai, 1 val. užduotis lieka neatlikta. Sistema parodo įspėjimą, kad visų užduočių atlikti iki termino neįmanoma. |
+| Klaida arba neįmanomas rezultatas | Užduotis neturi galutinio termino arba numatomas atlikimo laikas yra 0 val. / neigiamas.                                                                                                                          | Naudotojas bando išsaugoti užduotį arba sudaryti planą. | Sistema neleidžia naudoti netinkamų duomenų planavimui ir parodo aiškų klaidos pranešimą, nurodantį, kokį lauką reikia pataisyti.                                                                                                                                                                                  |
+| Užduoties būsenos pakeitimas      | Yra 3 neužbaigtos užduotys, sudarytas mokymosi planas. Naudotojas vieną užduotį pažymi kaip atliktą.                                                                                                              | Naudotojas pakeičia užduoties būseną į „Atlikta“.       | Atlikta užduotis pašalinama iš būsimo plano, o sistema perskaičiuoja likusių užduočių mokymosi planą.                                                                                                                                                                                                              |
 
 **Jei modulis naudoja AI:** Nenaudoja
 
@@ -214,7 +228,11 @@ MongoDB duomenų bazė
 
 ### AI rengiant šį dokumentą
 
-Rengiant šį dokumentą AI buvo naudojamas kaip pagalbinė priemonė idėjoms struktūrizuoti, formuluotėms tobulinti ir dokumento turiniui patikrinti.
+Rengiant šį dokumentą buvo naudojamas ChatGPT kaip AI pagalbinė priemonė. Jis buvo naudojamas idėjoms struktūrizuoti, dokumento skyrių formuluotėms parengti ir tekstui patobulinti. Taip pat ChatGPT buvo naudojamas patikrinti, ar aprašytos sistemos funkcijos, pagrindinis modulis, testavimo scenarijai ir technologijų pasirinkimas yra tarpusavyje suderinti.
+
+**Kas buvo panaudota:** Panaudotos pasiūlytos dokumento struktūros ir formuluotės.
+
+**Kas buvo atmesta arba perrašyta:** Pasiūlymai, kurie neatitiko mūsų pasirinktos sistemos funkcionalumo, projekto apimties arba buvo per daug bendri, buvo atmesti arba perrašyti. Pavyzdžiui, prioritetų skaičiavimas buvo sukonkretintas į mūsų pačių apibrėžtą formulę ir vienodų prioritetų sprendimo taisykles, kad sistema turėtų aiškiai patikrinamą elgesį.
 
 ### Planuojamas AI naudojimas kuriant sistemą
 
