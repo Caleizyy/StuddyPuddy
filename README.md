@@ -28,7 +28,7 @@ A study planner for students that prioritizes tasks by deadline and workload and
 
 ## Running locally
 
-Run commands for the frontend and backend will be added once the apps are scaffolded.
+    npm run dev:backend
 
 ## Code quality
 

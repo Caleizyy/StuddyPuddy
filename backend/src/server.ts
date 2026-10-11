@@ -1,4 +1,4 @@
 import { createApp } from './app.js';
+import { config } from './config/index.js';
 
-const port = process.env.PORT ?? 3000;
-createApp().listen(port, () => console.log(`API listening on port ${port}`));
+createApp().listen(config.port, () => console.log(`API listening on port ${config.port}`));

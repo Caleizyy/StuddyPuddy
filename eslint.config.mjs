@@ -29,15 +29,19 @@ export default [
     languageOptions: { globals: globals.node },
   },
   {
-    files: ['backend/src/core/**/*.ts'],
-    rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['express', 'cors', 'mongoose', 'mongodb', '**/controllers/**', '**/routes/**', '**/services/**', '**/config/**'],
-          message: 'core/ must not depend on HTTP, the database, or outer layers.',
-        }],
+  files: ['backend/src/core/**/*.ts'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [{
+        group: [
+          'express', 'cors', 'mongoose', 'mongodb',
+          '**/controllers/**', '**/routes/**', '**/services/**', '**/middleware/**',
+          '**/repositories/**', '**/models/**', '**/config/**', '**/utils/**',
+        ],
+        message: 'core/ must stay independent of HTTP, the database, and outer layers.',
       }],
-    },
+    }],
   },
+},
   prettier,
 ];
