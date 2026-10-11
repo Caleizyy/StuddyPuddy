@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-config-prettier';
@@ -7,8 +8,9 @@ import prettier from 'eslint-config-prettier';
 export default [
   { ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/coverage/**'] },
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ['frontend/**/*.{js,jsx}'],
+    files: ['frontend/**/*.{js,jsx,ts,tsx}'],
     plugins: { react, 'react-hooks': reactHooks },
     languageOptions: {
       globals: globals.browser,
@@ -23,8 +25,23 @@ export default [
     },
   },
   {
-    files: ['backend/**/*.js'],
+    files: ['backend/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
+  {
+  files: ['backend/src/core/**/*.ts'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [{
+        group: [
+          'express', 'cors', 'mongoose', 'mongodb',
+          '**/controllers/**', '**/routes/**', '**/services/**', '**/middleware/**',
+          '**/repositories/**', '**/models/**', '**/config/**', '**/utils/**',
+        ],
+        message: 'core/ must stay independent of HTTP, the database, and outer layers.',
+      }],
+    }],
+  },
+},
   prettier,
 ];
