@@ -14,7 +14,7 @@ A password hash is added by the authentication story.
 
 - `userId`: reference to a user, required
 - `title`: string, required, up to 120 characters
-- `category`: string, required
+- `category`: string, required; one of 'homework', 'exam', 'quiz', 'lab'
 - `deadline`: date, required
 - `moduleCount`: whole number, at least 1, required
 - `estimatedHours`: number, at least 0.25, required

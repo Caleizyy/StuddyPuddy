@@ -1,12 +1,13 @@
 import { Schema, model, type InferSchemaType } from 'mongoose';
 
 export const TASK_STATUSES = ['todo', 'in_progress', 'done'] as const;
+export const TASK_CATEGORIES = ['homework', 'exam', 'quiz', 'lab'] as const;
 
 const taskSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true, trim: true, maxlength: 120 },
-    category: { type: String, required: true, trim: true },
+    category: { type: String, required: true, enum: TASK_CATEGORIES },
     deadline: { type: Date, required: true },
     moduleCount: {
       type: Number,
