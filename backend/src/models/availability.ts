@@ -10,4 +10,5 @@ const availabilitySchema = new Schema(
 );
 
 export type Availability = InferSchemaType<typeof availabilitySchema>;
+availabilitySchema.index({ userId: 1, weekday: 1 }, { unique: true });
 export const AvailabilityModel = model('Availability', availabilitySchema);

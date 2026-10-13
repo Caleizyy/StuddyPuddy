@@ -21,4 +21,5 @@ const taskSchema = new Schema(
 );
 
 export type Task = InferSchemaType<typeof taskSchema>;
+taskSchema.index({ userId: 1, deadline: 1 });
 export const TaskModel = model('Task', taskSchema);
