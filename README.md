@@ -56,6 +56,10 @@ The collections, fields and indexes are described in [docs/data-model.md](docs/d
 
 The backend connects to MongoDB first and prints `MongoDB connected`, then `API listening on port 3000`. If the connection fails, it prints an error explaining what to check and exits. To confirm the API is up, open `http://localhost:3000/api/health`.
 
+    npm run dev:frontend
+
+The backend should run first to see API status connected and it be working properly. To confirm frontend works properly open http://localhost:5173/
+
 ## Code quality
 
 - `npm run lint` checks the code with ESLint.
