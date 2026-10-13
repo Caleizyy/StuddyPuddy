@@ -66,6 +66,7 @@ The backend should run first to see API status connected and it be working prope
 - `npm run typecheck` checks the TypeScript types.
 - `npm run format` formats everything with Prettier; `npm run format:check` only reports problems.
 - A pre-commit hook (Husky + lint-staged) lints and formats staged files and blocks the commit if lint errors remain. It installs automatically with `npm install`.
+- CI runs on every pull request to check lint, typecheck, format before allowing a person to merge.
 
 ## Workflow
 
