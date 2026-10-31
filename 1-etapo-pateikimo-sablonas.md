@@ -240,6 +240,10 @@ Rengiant šį dokumentą buvo naudojamas ChatGPT kaip AI pagalbinė priemonė. J
 
 **Kaip tikrinsiu pasiūlymus ir sugeneruotą kodą:** AI sugeneruotas kodas bus peržiūrimas ir naudojamas tik įsitikinus, kad suprantu, ką AI parašė ir kodėl kodas buvo sugeneruotas būtent taip. Sugeneruotas kodas bus papildomai tikrinamas paleidžiant programą ir atliekant testus.
 
+**Dirbtinio intelekto naudojimas kodo peržiūrai.** Šio projekto pull request'us automatiškai peržiūri CodeRabbit – DI kodo peržiūros įrankis, įdiegtas kaip GitHub programėlė tik šioje saugykloje. Įrankis nuskaito kiekviename pull request'e pakeistą kodą ir palieka komentarus bei santrauką. Projektui specifinės peržiūros taisyklės (kiekvieno įrašo priklausymo prisijungusiam naudotojui tikrinimas, visų įvesties duomenų validavimas, planavimo logikos (core/) atskyrimas nuo HTTP ir duomenų bazės kodo) saugomos saugyklos faile .coderabbit.yaml.
+
+Įrankio komentarai yra tik pasiūlymai: prieš sujungiant pakeitimus kiekvienas komentaras arba pataisomas, arba atmetamas nurodant priežastį, o kūrėjas privalo suprasti kiekvieną sujungiamą pakeitimą. Prieš pradedant naudoti įrankį buvo patikrintos kursų ir universiteto taisyklės dėl kodo siuntimo išorinėms paslaugoms [čia įrašykite patikrinimo rezultatą ir kas jį patvirtino].
+
 **Ar AI bus sistemos funkcionalumo dalis:** Neplanuojama
 
 ## 7. Tolesnių darbų planas
