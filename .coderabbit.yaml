@@ -15,7 +15,7 @@ reviews:
       - main
   path_filters:
     - '!package-lock.json'
-    - '!frontend/src/components/ui/**'
+    - '!frontend/@/components/ui/**'
   path_instructions:
     - path: '**'
       instructions: |
