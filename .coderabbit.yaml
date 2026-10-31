@@ -14,25 +14,25 @@ reviews:
       - dev
       - main
   path_filters:
-    - "!package-lock.json"
-    - "!frontend/src/components/ui/**"
+    - '!package-lock.json'
+    - '!frontend/src/components/ui/**'
   path_instructions:
-    - path: "**"
+    - path: '**'
       instructions: |
         - No secrets, passwords or connection strings in code; configuration comes from environment variables through backend/src/config.
         - Layering: routes call controllers, controllers call services, services use repositories and core. Flag any layer that skips or reverses this.
         - Flag changes to behavior that have no matching test.
-    - path: "backend/src/core/**"
+    - path: 'backend/src/core/**'
       instructions: |
         - core/ holds pure planning logic only. Flag any import from express, mongoose, the database, or any other layer (controllers, routes, services, middleware, repositories, models, config, utils).
         - Core must not read process.env or call Date.now() directly; the current time must be passed in as a parameter so rules are testable.
         - Every function should have unit tests in a *.test.ts file beside it.
-    - path: "backend/src/**"
+    - path: 'backend/src/**'
       instructions: |
         - Every endpoint that reads or writes user data must check that the record belongs to the authenticated user, and queries must filter by userId. Flag any lookup by record ID alone.
         - All request input must be validated with a Zod schema through the validate middleware before it is used.
         - Errors must be thrown as AppError and handled by the central error handler, so every error response has the same JSON format.
-    - path: "frontend/src/**"
+    - path: 'frontend/src/**'
       instructions: |
         - Use design tokens through Tailwind classes (bg-primary, text-muted-foreground, bg-priority-high). Flag hardcoded color values.
         - All HTTP calls go through the API client in src/api/client.ts, never a direct fetch in a component.
