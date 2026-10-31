@@ -71,3 +71,9 @@ The backend should run first to see API status connected and it be working prope
 ## Workflow
 
 Work happens on branches created from `dev`. Every change goes through a pull request, even when working alone, so that automated review and CI always run. `dev` is merged into `main` for releases.
+
+## Code review
+
+Pull requests are reviewed automatically by CodeRabbit, a GitHub app installed on this repository only. The project-specific review rules (ownership checks, validated input, core logic kept separate from HTTP and database code) live in `.coderabbit.yaml`.
+
+Its comments are suggestions, not decisions. Before a pull request is merged, every comment is either fixed or dismissed with a short written reason in the pull request thread, and every merged change must be understood by its author.
