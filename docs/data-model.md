@@ -7,8 +7,7 @@ StuddyPuddy stores its data in MongoDB, accessed through Mongoose. There are thr
 - `email`: string, required, unique, stored in lowercase
 - `name`: string, required
 - `createdAt`, `updatedAt`: set automatically
-
-A password hash is added by the authentication story.
+- `passwordHash`: string, bcrypt-hashed
 
 ## tasks
 

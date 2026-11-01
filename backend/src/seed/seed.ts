@@ -4,6 +4,7 @@ import { connectDatabase, disconnectDatabase } from '../config/database.js';
 import { UserModel } from '../models/user.js';
 import { TaskModel } from '../models/task.js';
 import { AvailabilityModel } from '../models/availability.js';
+import bcrypt from 'bcryptjs';
 
 // A deadline at the end of the day, `days` days from today
 function dueIn(days: number): Date {
@@ -20,6 +21,10 @@ function twoHoursEveryDay(userId: Types.ObjectId) {
 
 async function seed() {
   if (config.env === 'production') throw new Error('Refusing to seed in production');
+  if (!config.seedPassword) {
+    throw new Error('Set SEED_PASSWORD in backend/.env to seed the test users');
+  }
+  const passwordHash = await bcrypt.hash(config.seedPassword, config.bcryptRounds);
 
   await connectDatabase();
   await Promise.all([UserModel.init(), TaskModel.init(), AvailabilityModel.init()]);
@@ -30,8 +35,8 @@ async function seed() {
   ]);
 
   const [normalUser, conflictUser] = await UserModel.create([
-    { email: 'normal@example.com', name: 'Normal case' },
-    { email: 'conflict@example.com', name: 'Conflict case' },
+    { email: 'normal@example.com', name: 'Normal case', passwordHash: passwordHash },
+    { email: 'conflict@example.com', name: 'Conflict case', passwordHash: passwordHash },
   ]);
 
   // Scenario 1, normal case: three tasks with different deadlines
