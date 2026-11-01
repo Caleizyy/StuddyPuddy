@@ -21,6 +21,8 @@ jobs:
       - run: npm run format:check
       - run: npm run typecheck
       - run: npm run test:coverage
+      - name: Fix coverage paths for the monorepo
+        run: sed -i 's#^SF:#SF:backend/#' backend/coverage/lcov.info
       - name: SonarQube Cloud scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
