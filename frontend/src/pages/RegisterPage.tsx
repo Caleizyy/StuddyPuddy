@@ -1,7 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { ApiError } from '@/api/client';
+import { registerUser } from '@/api/auth';
 import { Button } from '../../@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../@/components/ui/card';
 import { Input } from '../../@/components/ui/input';
@@ -16,16 +18,31 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setError,
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
   async function onSubmit(values: RegisterForm) {
-    console.log(values); // replaced when the form is connected to the API
+    try {
+      await registerUser(values);
+      navigate('/login', { state: { registered: true } });
+    } catch (error) {
+      if (error instanceof ApiError && Array.isArray(error.details)) {
+        for (const detail of error.details as { field: string; message: string }[]) {
+          setError(detail.field as keyof RegisterForm, { message: detail.message });
+        }
+        return;
+      }
+      setError('root', {
+        message:
+          error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',
+      });
+    }
   }
-
   return (
     <main className="mx-auto max-w-md p-8">
       <Card>
