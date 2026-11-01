@@ -1,1 +1,1 @@
-Core folder that will hold all testable code. Used for Sonarqube quality gate.
+Core folder that will contain pure planning logic. Used for Sonarqube quality gate.
