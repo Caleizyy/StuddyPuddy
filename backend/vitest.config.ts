@@ -7,6 +7,7 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       MONGODB_URI: 'mongodb://localhost:27017/studdypuddy_test',
+      BCRYPT_ROUNDS: '4',
     },
     coverage: {
       provider: 'v8',

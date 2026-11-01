@@ -5,8 +5,6 @@ import { UserModel } from '../models/user.js';
 import { TaskModel } from '../models/task.js';
 import { AvailabilityModel } from '../models/availability.js';
 import bcrypt from 'bcryptjs';
-// ...inside seed(), before creating the users:
-const passwordHash = await bcrypt.hash('password123', 10);
 
 // A deadline at the end of the day, `days` days from today
 function dueIn(days: number): Date {
@@ -23,6 +21,10 @@ function twoHoursEveryDay(userId: Types.ObjectId) {
 
 async function seed() {
   if (config.env === 'production') throw new Error('Refusing to seed in production');
+  if (!config.seedPassword) {
+    throw new Error('Set SEED_PASSWORD in backend/.env to seed the test users');
+  }
+  const passwordHash = await bcrypt.hash(config.seedPassword, config.bcryptRounds);
 
   await connectDatabase();
   await Promise.all([UserModel.init(), TaskModel.init(), AvailabilityModel.init()]);

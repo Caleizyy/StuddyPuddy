@@ -29,7 +29,7 @@ export function RegisterPage() {
   async function onSubmit(values: RegisterForm) {
     try {
       await registerUser(values);
-      navigate('/login', { state: { registered: true } });
+      void navigate('/login', { state: { registered: true } });
     } catch (error) {
       if (error instanceof ApiError && Array.isArray(error.details)) {
         for (const detail of error.details as { field: string; message: string }[]) {
