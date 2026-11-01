@@ -4,6 +4,9 @@ import { connectDatabase, disconnectDatabase } from '../config/database.js';
 import { UserModel } from '../models/user.js';
 import { TaskModel } from '../models/task.js';
 import { AvailabilityModel } from '../models/availability.js';
+import bcrypt from 'bcryptjs';
+// ...inside seed(), before creating the users:
+const passwordHash = await bcrypt.hash('password123', 10);
 
 // A deadline at the end of the day, `days` days from today
 function dueIn(days: number): Date {
@@ -30,8 +33,8 @@ async function seed() {
   ]);
 
   const [normalUser, conflictUser] = await UserModel.create([
-    { email: 'normal@example.com', name: 'Normal case' },
-    { email: 'conflict@example.com', name: 'Conflict case' },
+    { email: 'normal@example.com', name: 'Normal case', passwordHash: passwordHash },
+    { email: 'conflict@example.com', name: 'Conflict case', passwordHash: passwordHash },
   ]);
 
   // Scenario 1, normal case: three tasks with different deadlines

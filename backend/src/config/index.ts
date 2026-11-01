@@ -11,5 +11,6 @@ export const config = {
   port: Number(process.env.PORT ?? 3000),
   mongoUri: required('MONGODB_URI'),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  bcryptRounds: Number(process.env.BCRYPT_ROUNDS ?? 12),
   // secrets (e.g. a token secret) join this object when authentication is built
 };
