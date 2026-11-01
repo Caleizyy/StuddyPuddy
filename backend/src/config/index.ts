@@ -18,5 +18,5 @@ export const config = {
   mongoUri: required('MONGODB_URI'),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   bcryptRounds,
-  // secrets (e.g. a token secret) join this object when authentication is built
+  seedPassword: process.env.SEED_PASSWORD, // only used by `npm run seed`
 };
