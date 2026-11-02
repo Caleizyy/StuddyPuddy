@@ -33,11 +33,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
-    if (response.status === 401 && tokenUsed) unauthorizedHandler?.(tokenUsed);
     const body = await response.json().catch(() => null);
+    const code = body?.error?.code ?? 'UNKNOWN_ERROR';
+
+    // Only a rejected token ends the session; a failed login also returns 401
+    if (response.status === 401 && code === 'UNAUTHORIZED' && tokenUsed) {
+      unauthorizedHandler?.(tokenUsed);
+    }
+
     throw new ApiError(
       response.status,
-      body?.error?.code ?? 'UNKNOWN_ERROR',
+      code,
       body?.error?.message ?? response.statusText,
       body?.error?.details,
     );

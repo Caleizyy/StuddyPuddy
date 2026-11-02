@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate, Navigate } from 'react-router';
 import { ApiError } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, status } = useAuth();
   const state = location.state as { from?: string; registered?: boolean } | null;
 
   const {
@@ -41,6 +41,7 @@ export function LoginPage() {
     }
   }
 
+  if (status === 'authenticated') return <Navigate to="/dashboard" replace />;
   return (
     <main className="mx-auto max-w-md p-8">
       <Card>
