@@ -21,6 +21,7 @@ export function setAuthToken(token: string | null) {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
+  const tokenUsed = authToken;
   if (options.body) headers.set('Content-Type', 'application/json');
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
 
@@ -32,7 +33,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
-    if (response.status === 401 && authToken) unauthorizedHandler?.();
+    if (response.status === 401 && tokenUsed) unauthorizedHandler?.(tokenUsed);
     const body = await response.json().catch(() => null);
     throw new ApiError(
       response.status,
@@ -55,7 +56,7 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 
-let unauthorizedHandler: (() => void) | null = null;
-export function setUnauthorizedHandler(handler: (() => void) | null) {
+let unauthorizedHandler: ((tokenUsed: string) => void) | null = null;
+export function setUnauthorizedHandler(handler: ((tokenUsed: string) => void) | null) {
   unauthorizedHandler = handler;
 }

@@ -9,6 +9,8 @@ export default defineConfig({
       MONGODB_URI: 'mongodb://localhost:27017/studdypuddy_test',
       BCRYPT_ROUNDS: '4',
       JWT_SECRET: 'test-secret-test-secret-test-secret-1234',
+      LOGIN_LIMIT_PER_IP: '1000',
+      LOGIN_LIMIT_PER_EMAIL: '1000',
     },
     coverage: {
       provider: 'v8',

@@ -26,4 +26,9 @@ export const config = {
   seedPassword: process.env.SEED_PASSWORD, // only used by `npm run seed`
   jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
+  loginRateLimit: {
+    windowMs: 15 * 60 * 1000,
+    perIp: Number(process.env.LOGIN_LIMIT_PER_IP ?? 20),
+    perEmail: Number(process.env.LOGIN_LIMIT_PER_EMAIL ?? 5),
+  },
 };

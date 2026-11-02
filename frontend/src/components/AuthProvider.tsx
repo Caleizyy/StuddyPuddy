@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
 import { getCurrentUser, loginUser, logoutUser, type AuthUser } from '@/api/auth';
-import { setAuthToken, setUnauthorizedHandler } from '@/api/client';
+import { setAuthToken, setUnauthorizedHandler, ApiError } from '@/api/client';
 import { AuthContext, type AuthStatus } from '@/lib/authContext';
 
 const TOKEN_KEY = 'studdypuddy.token';
@@ -27,31 +27,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(() =>
     readStoredToken() ? 'loading' : 'anonymous',
   );
+  // The token the current session belongs to; results for any other token are stale
+  const activeToken = useRef<string | null>(null);
 
   const clearSession = useCallback(() => {
+    activeToken.current = null;
     setAuthToken(null);
     storeToken(null);
     setUser(null);
     setStatus('anonymous');
   }, []);
 
+  const restoreSession = useCallback((token: string) => {
+    activeToken.current = token;
+    setAuthToken(token);
+    setStatus('loading');
+    getCurrentUser()
+      .then((result) => {
+        if (activeToken.current !== token) return; // replaced by a newer login or logout
+        setUser(result.user);
+        setStatus('authenticated');
+      })
+      .catch((error: unknown) => {
+        if (activeToken.current !== token) return;
+        // A 401 is already handled by the unauthorized handler, which clears the session
+        if (error instanceof ApiError && error.status === 401) return;
+        // Network or server problem: keep the token and let the user retry
+        setStatus('unavailable');
+      });
+  }, []);
+
   useEffect(() => {
-    setUnauthorizedHandler(clearSession);
+    setUnauthorizedHandler((tokenUsed) => {
+      if (tokenUsed === activeToken.current) clearSession();
+    });
     const token = readStoredToken();
-    if (token) {
-      setAuthToken(token);
-      getCurrentUser()
-        .then((result) => {
-          setUser(result.user);
-          setStatus('authenticated');
-        })
-        .catch(clearSession);
-    }
+    if (token) restoreSession(token);
     return () => setUnauthorizedHandler(null);
-  }, [clearSession]);
+  }, [clearSession, restoreSession]);
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await loginUser({ email, password });
+    activeToken.current = result.token;
     setAuthToken(result.token);
     storeToken(result.token);
     setUser(result.user);
@@ -67,7 +84,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSession();
   }, [clearSession]);
 
-  const value = useMemo(() => ({ user, status, login, logout }), [user, status, login, logout]);
+  const retry = useCallback(() => {
+    const token = activeToken.current ?? readStoredToken();
+    if (token) restoreSession(token);
+    else clearSession();
+  }, [clearSession, restoreSession]);
+
+  const value = useMemo(
+    () => ({ user, status, login, logout, retry }),
+    [user, status, login, logout, retry],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
