@@ -21,6 +21,7 @@ export function setAuthToken(token: string | null) {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
+  const tokenUsed = authToken;
   if (options.body) headers.set('Content-Type', 'application/json');
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
 
@@ -33,9 +34,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+    const code = body?.error?.code ?? 'UNKNOWN_ERROR';
+
+    // Only a rejected token ends the session; a failed login also returns 401
+    if (response.status === 401 && code === 'UNAUTHORIZED' && tokenUsed) {
+      unauthorizedHandler?.(tokenUsed);
+    }
+
     throw new ApiError(
       response.status,
-      body?.error?.code ?? 'UNKNOWN_ERROR',
+      code,
       body?.error?.message ?? response.statusText,
       body?.error?.details,
     );
@@ -53,3 +61,8 @@ export const api = {
     request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
+
+let unauthorizedHandler: ((tokenUsed: string) => void) | null = null;
+export function setUnauthorizedHandler(handler: ((tokenUsed: string) => void) | null) {
+  unauthorizedHandler = handler;
+}

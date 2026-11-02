@@ -14,3 +14,15 @@ export async function createUser(data: NewUser) {
     throw error;
   }
 }
+
+export function findUserByEmailWithHash(email: string) {
+  return UserModel.findOne({ email }).select('+passwordHash');
+}
+
+export function findUserById(id: string) {
+  return UserModel.findById(id);
+}
+
+export async function bumpTokenVersion(id: string) {
+  await UserModel.updateOne({ _id: id }, { $inc: { tokenVersion: 1 } });
+}
