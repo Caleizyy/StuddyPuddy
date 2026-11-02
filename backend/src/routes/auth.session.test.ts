@@ -98,4 +98,14 @@ describe('protected routes', () => {
     const response = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
     expect(response.status).toBe(401);
   });
+
+  it('returns a validation error, not a 500, when the email is not a string', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({ email: { toString: null }, password: 'x' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    expect(userRepository.findUserByEmailWithHash).not.toHaveBeenCalled();
+  });
 });

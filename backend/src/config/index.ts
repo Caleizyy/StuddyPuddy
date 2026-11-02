@@ -17,6 +17,15 @@ if (jwtSecret.length < 32) {
   throw new Error('JWT_SECRET must be at least 32 characters');
 }
 
+function positiveIntFromEnv(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined) return fallback;
+  if (!/^[1-9]\d*$/.test(raw.trim())) {
+    throw new Error(`${name} must be a positive whole number, got "${raw}"`);
+  }
+  return Number(raw);
+}
+
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
@@ -28,7 +37,7 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   loginRateLimit: {
     windowMs: 15 * 60 * 1000,
-    perIp: Number(process.env.LOGIN_LIMIT_PER_IP ?? 20),
-    perEmail: Number(process.env.LOGIN_LIMIT_PER_EMAIL ?? 5),
+    perIp: positiveIntFromEnv('LOGIN_LIMIT_PER_IP', 20),
+    perEmail: positiveIntFromEnv('LOGIN_LIMIT_PER_EMAIL', 5),
   },
 };

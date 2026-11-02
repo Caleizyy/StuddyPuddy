@@ -1,7 +1,12 @@
-import { rateLimit } from 'express-rate-limit';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { AppError } from '../utils/AppError.js';
 
-type LimiterOptions = { windowMs: number; max: number; keyBy?: 'ip' | 'email' };
+type LimiterOptions = { windowMs: number; max: number; keyBy?: 'ip' | 'ip-and-email' };
+
+const emailOf = (body: unknown): string => {
+  const email = (body as { email?: unknown } | undefined)?.email;
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+};
 
 export function createLimiter({ windowMs, max, keyBy = 'ip' }: LimiterOptions) {
   return rateLimit({
@@ -10,11 +15,8 @@ export function createLimiter({ windowMs, max, keyBy = 'ip' }: LimiterOptions) {
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     skipSuccessfulRequests: true, // only failed attempts count towards the limit
-    ...(keyBy === 'email' && {
-      keyGenerator: (req) =>
-        String(req.body?.email ?? '')
-          .trim()
-          .toLowerCase(),
+    ...(keyBy === 'ip-and-email' && {
+      keyGenerator: (req) => `${ipKeyGenerator(req.ip ?? '')}|${emailOf(req.body)}`,
     }),
     handler: (req, res, next) => {
       next(
