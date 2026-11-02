@@ -8,6 +8,7 @@ StuddyPuddy stores its data in MongoDB, accessed through Mongoose. There are thr
 - `name`: string, required
 - `createdAt`, `updatedAt`: set automatically
 - `passwordHash`: string, bcrypt-hashed
+- `tokenVersion`: string, encrypted
 
 ## tasks
 

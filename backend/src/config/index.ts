@@ -12,6 +12,11 @@ if (!Number.isInteger(bcryptRounds) || bcryptRounds < minBcryptRounds) {
   throw new Error(`BCRYPT_ROUNDS must be an integer of at least ${minBcryptRounds}`);
 }
 
+const jwtSecret = required('JWT_SECRET');
+if (jwtSecret.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters');
+}
+
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
@@ -19,4 +24,6 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   bcryptRounds,
   seedPassword: process.env.SEED_PASSWORD, // only used by `npm run seed`
+  jwtSecret,
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
 };
