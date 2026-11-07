@@ -1,0 +1,10 @@
+  bugfix/core-planning-logic[m
+  bugfix/tasks-ownership[m
+  chore/coderabbit[m
+  chore/sonarqube-cloud[m
+* [32mdev[m
+  feat/core-planning-logic[m
+  feat/login-logout[m
+  feat/registration[m
+  feat/set-availability[m
+  feat/tasks-ownership[m
