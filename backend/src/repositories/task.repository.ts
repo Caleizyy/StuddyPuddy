@@ -5,8 +5,9 @@ export type TaskRecord = HydratedDocument<Task>;
 export type NewTaskFields = Pick<
   Task,
   'title' | 'category' | 'deadline' | 'moduleCount' | 'estimatedHours'
->;
-export type TaskFields = Partial<NewTaskFields & Pick<Task, 'status'>>;
+> &
+  Partial<Pick<Task, 'status'>>;
+export type TaskFields = Partial<NewTaskFields>;
 
 export async function listTasksForUser(userId: string): Promise<TaskRecord[]> {
   return TaskModel.find({ userId }).sort({ deadline: 1 });

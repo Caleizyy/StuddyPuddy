@@ -131,6 +131,13 @@ describe('creating and reading your own tasks', () => {
     expect((await asUser(tokenAda).remove(id)).status).toBe(204);
     expect((await asUser(tokenAda).get(id)).status).toBe(404);
   });
+
+  it('uses the status you send, and todo (Not completed) when you send none', async () => {
+    const chosen = await asUser(tokenAda).create({ ...physicsLab, status: 'in_progress' });
+    const none = await asUser(tokenAda).create(physicsLab);
+    expect(chosen.body.task.status).toBe('in_progress');
+    expect(none.body.task.status).toBe('todo');
+  });
 });
 
 describe("another user's task", () => {
@@ -203,6 +210,7 @@ describe('invalid tasks are rejected', () => {
       { ...physicsLab, estimatedHours: 1.3 },
       { ...physicsLab, estimatedHours: 1001 },
       { ...physicsLab, moduleCount: 0 },
+      { ...physicsLab, status: 'finished' },
     ];
     for (const body of bad) {
       const response = await asUser(tokenAda).create(body);
