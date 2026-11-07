@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from './dates.js';
-import { assessTask, compareRanked, MAX_SCORE } from './priority.js';
+import { assessTask, compareRanked, MAX_SCORE, availableHoursUntil } from './priority.js';
 import type { PlanTask, Ranked } from './types.js';
 
 const now = new Date('2026-11-09T10:00:00Z'); // a Monday
@@ -84,5 +84,18 @@ describe('compareRanked tie-breaking', () => {
     const second = ranked(task('Second', 3, 2), 0.3);
     expect(compareRanked(first, second)).toBeLessThan(0);
     expect(compareRanked(second, first)).toBeGreaterThan(0);
+  });
+});
+
+describe('availableHoursUntil', () => {
+  it('gives the same result as adding up the days one by one', () => {
+    const hours = [1, 2, 3, 0, 4, 0.5, 2];
+    for (const days of [1, 6, 7, 8, 20, 365]) {
+      let expected = 0;
+      for (let day = 0; day < days; day++) {
+        expected += hours[addDays(now, day).getUTCDay()];
+      }
+      expect(availableHoursUntil(days, hours, now)).toBe(expected);
+    }
   });
 });

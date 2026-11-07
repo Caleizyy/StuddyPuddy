@@ -23,14 +23,8 @@ export function buildPlan({ tasks, hoursByWeekday, now }: PlanInput): Plan {
   }));
   ranked.sort(compareRanked);
 
-  let lastDay = 0;
-  for (const { assessment } of ranked) {
-    if (assessment.remainingDays > lastDay) lastDay = assessment.remainingDays;
-  }
   const freeHours: number[] = [];
-  for (let day = 0; day < lastDay; day++) {
-    freeHours.push(hoursByWeekday[addDays(now, day).getUTCDay()]);
-  }
+  let firstFreeDay = 0; // every day before this one is already full
 
   const items: PlanItem[] = [];
   const schedule: ScheduleEntry[] = [];
@@ -39,20 +33,30 @@ export function buildPlan({ tasks, hoursByWeekday, now }: PlanInput): Plan {
   for (const { task, assessment } of ranked) {
     let hoursLeft = task.estimatedHours;
 
-    for (let day = 0; day < assessment.remainingDays; day++) {
-      if (hoursLeft <= 0) break;
+    if (assessment.availableHours > 0) {
+      for (let day = firstFreeDay; day < assessment.remainingDays; day++) {
+        if (hoursLeft <= 0) break;
 
-      const hours = Math.min(freeHours[day], hoursLeft);
-      if (hours <= 0) continue; // this day is already full
+        if (day >= freeHours.length) {
+          freeHours.push(hoursByWeekday[addDays(now, day).getUTCDay()]);
+        }
 
-      freeHours[day] -= hours; // those hours are now used up
-      hoursLeft -= hours;
-      schedule.push({
-        date: dateKey(addDays(now, day)),
-        taskId: task.id,
-        title: task.title,
-        hours,
-      });
+        const hours = Math.min(freeHours[day], hoursLeft);
+        if (hours <= 0) continue; // this day is already full
+
+        freeHours[day] -= hours;
+        hoursLeft -= hours;
+        schedule.push({
+          date: dateKey(addDays(now, day)),
+          taskId: task.id,
+          title: task.title,
+          hours,
+        });
+      }
+    }
+
+    while (firstFreeDay < freeHours.length && freeHours[firstFreeDay] === 0) {
+      firstFreeDay++;
     }
 
     items.push({

@@ -150,4 +150,50 @@ describe('buildPlan', () => {
       expect(error).toMatchObject({ field: 'availability' });
     }
   });
+
+  it('handles a deadline millions of days away without freezing', () => {
+    const plan = buildPlan({
+      tasks: [task('Far away', 90_000_000, 5)],
+      hoursByWeekday: everyDay(2),
+      now,
+    });
+    expect(plan.schedule.map((entry) => entry.hours)).toEqual([2, 2, 1]);
+    expect(plan.feasible).toBe(true);
+  });
+
+  it('warns for a far-away deadline when there is no study time', () => {
+    const plan = buildPlan({
+      tasks: [task('Never', 90_000_000, 5)],
+      hoursByWeekday: everyDay(0),
+      now,
+    });
+    expect(plan.schedule).toEqual([]);
+    expect(plan.feasible).toBe(false);
+  });
+
+  it('keeps a plan feasible when the deadline is more than a year away', () => {
+    // 700 hours at 2 hours a day needs 350 days, and the deadline is 400 days away
+    const plan = buildPlan({
+      tasks: [task('Thesis', 400, 700)],
+      hoursByWeekday: everyDay(2),
+      now,
+    });
+    expect(plan.feasible).toBe(true);
+    expect(plan.items[0].scheduledHours).toBe(700);
+    expect(plan.schedule).toHaveLength(350);
+  });
+
+  it('rejects hours that are too large or not in quarter-hour steps', () => {
+    for (const hours of [1001, 1.3]) {
+      const error = errorFrom(() =>
+        buildPlan({ tasks: [task('Bad', 2, hours)], hoursByWeekday: everyDay(2), now }),
+      );
+      expect(error).toMatchObject({ field: 'estimatedHours' });
+    }
+
+    const availabilityError = errorFrom(() =>
+      buildPlan({ tasks: [], hoursByWeekday: [0.1, 2, 2, 2, 2, 2, 2], now }),
+    );
+    expect(availabilityError).toMatchObject({ field: 'availability' });
+  });
 });

@@ -11,11 +11,18 @@ export function bandFor(score: number): PriorityBand {
   return 'low';
 }
 
-// Adds up the study hours of each day from today until the deadline
 export function availableHoursUntil(days: number, hoursByWeekday: number[], now: Date): number {
-  let total = 0;
-  for (let day = 0; day < days; day++) {
-    const weekday = addDays(now, day).getUTCDay();
+  const fullWeeks = Math.floor(days / 7);
+  const leftoverDays = days % 7;
+
+  let hoursPerWeek = 0;
+  for (const hours of hoursByWeekday) {
+    hoursPerWeek += hours;
+  }
+
+  let total = fullWeeks * hoursPerWeek;
+  for (let i = 0; i < leftoverDays; i++) {
+    const weekday = addDays(now, fullWeeks * 7 + i).getUTCDay();
     total += hoursByWeekday[weekday];
   }
   return total;
@@ -35,7 +42,6 @@ export function assessTask(task: PlanTask, hoursByWeekday: number[], now: Date):
     };
   }
 
-  // A task due today still counts as one day, so we never divide by zero
   const remainingDays = Math.max(1, daysLeft);
   const availableHours = availableHoursUntil(remainingDays, hoursByWeekday, now);
 
@@ -54,8 +60,6 @@ export function assessTask(task: PlanTask, hoursByWeekday: number[], now: Date):
   };
 }
 
-// Used by sort(): a negative number means `a` goes first.
-// Order: higher score, then earlier deadline, then longer task, then created earlier.
 export function compareRanked(a: Ranked, b: Ranked): number {
   if (a.assessment.score !== b.assessment.score) {
     return b.assessment.score - a.assessment.score;
