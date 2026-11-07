@@ -3,6 +3,7 @@ import { addDays } from './dates.js';
 import { PlanningInputError } from './errors.js';
 import { buildPlan } from './plan.js';
 import type { PlanTask } from './types.js';
+import { dateKey } from './dates.js';
 
 const now = new Date('2026-11-09T10:00:00Z'); // a Monday
 const everyDay = (hours: number) => Array<number>(7).fill(hours);
@@ -30,7 +31,7 @@ function errorFrom(fn: () => unknown): unknown {
 }
 
 describe('buildPlan', () => {
-  it('normal case: the nearer deadline ranks first and everything fits', () => {
+  it('scenario 1 *(normal): the nearer deadline ranks first and everything fits', () => {
     const plan = buildPlan({
       tasks: [task('History', 7, 2), task('Math', 5, 6), task('Lab', 2, 3)],
       hoursByWeekday: everyDay(2),
@@ -42,9 +43,14 @@ describe('buildPlan', () => {
     expect(plan.items.map((i) => i.scheduledHours)).toEqual([3, 6, 2]);
     expect(plan.warnings).toEqual([]);
     expect(plan.feasible).toBe(true);
+
+    for (const entry of plan.schedule) {
+      const item = plan.items.find((i) => i.taskId === entry.taskId)!;
+      expect(entry.date < dateKey(item.deadline)).toBe(true);
+    }
   });
 
-  it('conflict case: the 8 h task gets the 4 available hours and a warning is raised', () => {
+  it('scenario 2 (conflict): the 8 h task gets the 4 available hours and a warning is raised', () => {
     const plan = buildPlan({
       tasks: [task('Short', 2, 1), task('Long', 2, 8)],
       hoursByWeekday: everyDay(2),
@@ -56,40 +62,57 @@ describe('buildPlan', () => {
     expect(plan.items[1]).toMatchObject({ scheduledHours: 0, unscheduledHours: 1 });
     expect(plan.feasible).toBe(false);
     expect(plan.warnings.map((w) => w.title)).toEqual(['Long', 'Short']);
+
+    const [long, short] = plan.items;
+    expect(long.availableHours).toBe(4);
+    expect(long.priorityScore * long.remainingDays).toBeCloseTo(2);
+    expect(short.priorityScore * short.remainingDays).toBeCloseTo(0.25);
   });
 
-  it('removes a finished task and recalculates the plan', () => {
+  it('scenario 4 (status change): a finished task leaves the plan and the rest is recalculated', () => {
     const lab = task('Lab', 2, 3);
     const math = task('Math', 5, 6);
+    const history = task('History', 7, 2);
     const input = { hoursByWeekday: everyDay(2), now };
 
-    const before = buildPlan({ tasks: [lab, math], ...input });
-    expect(before.items[0].title).toBe('Lab');
+    const before = buildPlan({ tasks: [lab, math, history], ...input });
+    expect(before.items.map((i) => i.title)).toEqual(['Lab', 'Math', 'History']);
 
-    const after = buildPlan({ tasks: [{ ...lab, status: 'done' }, math], ...input });
-    expect(after.items.map((i) => i.title)).toEqual(['Math']);
+    const after = buildPlan({ tasks: [{ ...lab, status: 'done' }, math, history], ...input });
+    expect(after.items.map((i) => i.title)).toEqual(['Math', 'History']);
     expect(after.schedule.every((entry) => entry.taskId !== lab.id)).toBe(true);
+    expect(after.schedule[0]).toMatchObject({ taskId: math.id, date: '2026-11-09' });
   });
 
   it('never schedules more hours on a day than the user has', () => {
-    const hoursByWeekday = [1, 2, 3, 2, 1, 0, 4];
-    const plan = buildPlan({
-      tasks: [task('A', 3, 5), task('B', 6, 7), task('C', 1, 2), task('D', 10, 9)],
-      hoursByWeekday,
-      now,
-    });
+    const patterns = [
+      [1, 2, 3, 2, 1, 0, 4],
+      [0, 0, 0, 0, 0, 0, 0.5],
+      [4, 4, 4, 4, 4, 4, 4],
+      [0.25, 0, 3, 0, 1.5, 0, 2],
+    ];
+    const tasks = [
+      task('A', 3, 5),
+      task('B', 6, 7),
+      task('C', 1, 2),
+      task('D', 10, 9),
+      task('E', 0, 1),
+    ];
 
-    const perDay = new Map<string, number>();
-    for (const entry of plan.schedule) {
-      perDay.set(entry.date, (perDay.get(entry.date) ?? 0) + entry.hours);
-    }
-    for (const [date, total] of perDay) {
-      expect(total).toBeLessThanOrEqual(hoursByWeekday[new Date(date).getUTCDay()] + 1e-9);
+    for (const hoursByWeekday of patterns) {
+      const plan = buildPlan({ tasks, hoursByWeekday, now });
+
+      const perDay = new Map<string, number>();
+      for (const entry of plan.schedule) {
+        perDay.set(entry.date, (perDay.get(entry.date) ?? 0) + entry.hours);
+      }
+      for (const [date, total] of perDay) {
+        expect(total).toBeLessThanOrEqual(hoursByWeekday[new Date(date).getUTCDay()]);
+      }
     }
   });
 
   it('uses the hours of the matching weekday', () => {
-    // Only Mondays have study time; today (2026-11-09) is a Monday
     const plan = buildPlan({
       tasks: [task('Report', 3, 2)],
       hoursByWeekday: [0, 3, 0, 0, 0, 0, 0],
@@ -137,7 +160,7 @@ describe('buildPlan', () => {
     expect(error).toMatchObject({ field: 'deadline' });
   });
 
-  it('rejects invalid availability', () => {
+  it('scenario 3 (invalid input): rejects invalid availability', () => {
     const error = errorFrom(() => buildPlan({ tasks: [], hoursByWeekday: [1, 2, 3], now }));
     expect(error).toMatchObject({ field: 'availability' });
   });
