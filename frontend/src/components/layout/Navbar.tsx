@@ -107,7 +107,8 @@ export function Navbar() {
 
         {status === 'unavailable' && (
           <Button variant="outline" size="sm" onClick={retry}>
-            Cannot reach the server. Try again
+            <span className="hidden sm:inline">Cannot reach the server.</span>
+            Try again
           </Button>
         )}
       </div>
