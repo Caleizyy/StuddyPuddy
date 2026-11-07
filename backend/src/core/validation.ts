@@ -3,7 +3,7 @@ import type { PlanTask } from './types.js';
 
 export const MAX_TASK_HOURS = 1000;
 
-function isQuarterHours(value: number): boolean {
+export function isQuarterHours(value: number): boolean {
   return value % 0.25 === 0;
 }
 

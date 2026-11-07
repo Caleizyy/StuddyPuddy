@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import { TASK_CATEGORIES, TASK_STATUSES } from '../models/task.js';
-
-// Hours must be in steps of 0.25, the same rule the planning core uses
-const isQuarterHours = (value: number) => value % 0.25 === 0;
+import { isQuarterHours, MAX_TASK_HOURS } from '../core/validation.js';
 
 export const createTaskSchema = z.object({
   title: z.string({ error: 'Title is required' }).trim().min(1, 'Title is required').max(120),
@@ -15,7 +13,7 @@ export const createTaskSchema = z.object({
   estimatedHours: z
     .number({ error: 'Estimated hours is required' })
     .min(0.25, 'At least 0.25 hours')
-    .max(1000, 'At most 1000 hours')
+    .max(MAX_TASK_HOURS, `At most ${MAX_TASK_HOURS} hours`)
     .refine(isQuarterHours, 'Use steps of 0.25 hours'),
 });
 
