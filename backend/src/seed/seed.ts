@@ -68,7 +68,7 @@ async function seed() {
   ]);
 
   // Scenario 2, boundary case: same deadline, 1 h and 8 h, only 4 h available until then
-  const sharedDeadline = dueIn(1);
+  const sharedDeadline = dueIn(2);
   await TaskModel.create([
     {
       userId: conflictUser._id,

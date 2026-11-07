@@ -26,7 +26,7 @@ StuddyPuddy stores its data in MongoDB, accessed through Mongoose. There are thr
 One document per user per weekday.
 
 - `userId`: reference to a user, required
-- `weekday`: whole number from 0 to 6, required
+- `weekday`: whole number from 0 to 6, required; 0 is Sunday, 1 is Monday ... 6 is Saturday (the same numbering as JavaScript's `getUTCDay()`)
 - `hoursAvailable`: number from 0 to 24, required
 - `createdAt`, `updatedAt`: set automatically
 
