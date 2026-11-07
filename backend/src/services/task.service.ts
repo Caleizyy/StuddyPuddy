@@ -1,0 +1,55 @@
+import {
+  createTaskForUser,
+  deleteTaskForUser,
+  findTaskForUser,
+  listTasksForUser,
+  updateTaskForUser,
+  type TaskRecord,
+} from '../repositories/task.repository.js';
+import type { CreateTaskInput, UpdateTaskInput } from '../schemas/task.schema.js';
+import { AppError } from '../utils/AppError.js';
+
+function toTaskDto(task: TaskRecord) {
+  return {
+    id: task.id,
+    title: task.title,
+    category: task.category,
+    deadline: task.deadline,
+    moduleCount: task.moduleCount,
+    estimatedHours: task.estimatedHours,
+    status: task.status,
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+  };
+}
+
+function taskNotFound() {
+  return new AppError(404, 'TASK_NOT_FOUND', 'Task not found');
+}
+
+export async function listTasks(userId: string) {
+  const tasks = await listTasksForUser(userId);
+  return tasks.map(toTaskDto);
+}
+
+export async function getTask(userId: string, taskId: string) {
+  const task = await findTaskForUser(userId, taskId);
+  if (!task) throw taskNotFound();
+  return toTaskDto(task);
+}
+
+export async function createTask(userId: string, input: CreateTaskInput) {
+  const task = await createTaskForUser(userId, input);
+  return toTaskDto(task);
+}
+
+export async function updateTask(userId: string, taskId: string, input: UpdateTaskInput) {
+  const task = await updateTaskForUser(userId, taskId, input);
+  if (!task) throw taskNotFound();
+  return toTaskDto(task);
+}
+
+export async function deleteTask(userId: string, taskId: string) {
+  const task = await deleteTaskForUser(userId, taskId);
+  if (!task) throw taskNotFound();
+}
