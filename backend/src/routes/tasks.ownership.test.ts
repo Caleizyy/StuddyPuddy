@@ -65,8 +65,17 @@ async function adaCreatesTask(): Promise<string> {
 
 describe('tasks need a login', () => {
   it('rejects requests without a token', async () => {
-    expect((await request(app).get('/api/tasks')).status).toBe(401);
-    expect((await request(app).post('/api/tasks').send(physicsLab)).status).toBe(401);
+    const id = new mongoose.Types.ObjectId().toString();
+    const calls = [
+      request(app).get('/api/tasks'),
+      request(app).post('/api/tasks').send(physicsLab),
+      request(app).get(`/api/tasks/${id}`),
+      request(app).patch(`/api/tasks/${id}`).send({ title: 'x' }),
+      request(app).delete(`/api/tasks/${id}`),
+    ];
+    for (const call of calls) {
+      expect((await call).status).toBe(401);
+    }
   });
 });
 
@@ -158,6 +167,29 @@ describe("another user's task", () => {
 
   it('answers 404, not a server error, for a malformed id', async () => {
     expect((await asUser(tokenAda).get('not-an-id')).status).toBe(404);
+  });
+
+  it('ignores a userId in the query string', async () => {
+    const ben = await UserModel.findOne({ email: 'ben@example.com' });
+    await asUser(tokenBen).create({ ...physicsLab, title: "Ben's task" });
+
+    const response = await request(app)
+      .get(`/api/tasks?userId=${ben!.id}`)
+      .set('Authorization', `Bearer ${tokenAda}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.tasks).toEqual([]);
+  });
+
+  it('cannot be handed to another owner through an edit', async () => {
+    const id = await adaCreatesTask();
+    const ben = await UserModel.findOne({ email: 'ben@example.com' });
+
+    await asUser(tokenAda).update(id, { title: 'Still mine', userId: ben!.id });
+
+    const saved = await TaskModel.findById(id);
+    expect(String(saved?.userId)).toBe(adaId);
+    expect(saved?.title).toBe('Still mine');
   });
 });
 
