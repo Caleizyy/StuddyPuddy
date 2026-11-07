@@ -43,7 +43,7 @@ function NavItems({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => 
 }
 
 export function Navbar() {
-  const { status, logout } = useAuth();
+  const { status, logout, retry } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const isLoggedIn = status === 'authenticated';
@@ -102,6 +102,12 @@ export function Navbar() {
             onClick={() => setMenuOpen((open) => !open)}
           >
             {menuOpen ? <X /> : <Menu />}
+          </Button>
+        )}
+
+        {status === 'unavailable' && (
+          <Button variant="outline" size="sm" onClick={retry}>
+            Cannot reach the server. Try again
           </Button>
         )}
       </div>
