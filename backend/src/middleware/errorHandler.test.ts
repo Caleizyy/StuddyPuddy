@@ -3,6 +3,9 @@ import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '../utils/AppError.js';
 import { errorHandler } from './errorHandler.js';
+import { createApp } from '../app.js';
+
+const app = createApp();
 
 function appThatThrows(error: unknown) {
   const app = express();
@@ -55,5 +58,17 @@ describe('error handler', () => {
     const response = await request(app).get('/boom');
     expect(response.status).toBe(503);
     expect(response.body.error.message).toBe('Internal server error');
+  });
+
+  it('answers 400 BAD_REQUEST for a malformed JSON body', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .set('Content-Type', 'application/json')
+      .send('{"email": ');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('BAD_REQUEST');
+    expect(typeof response.body.error.message).toBe('string');
+    expect(response.body.error.details).toBeUndefined();
   });
 });

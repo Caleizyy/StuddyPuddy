@@ -5,6 +5,7 @@ import { UserModel } from '../models/user.js';
 import { TaskModel } from '../models/task.js';
 import { AvailabilityModel } from '../models/availability.js';
 import bcrypt from 'bcryptjs';
+import { assertSeedAllowed } from './guard.js';
 
 // A deadline at the end of the day, `days` days from today
 function dueIn(days: number): Date {
@@ -20,6 +21,7 @@ function twoHoursEveryDay(userId: Types.ObjectId) {
 }
 
 async function seed() {
+  assertSeedAllowed(config);
   if (!config.allowSeedWipe) {
     throw new Error(
       'The seed deletes all users, tasks and availability. Set ALLOW_SEED_WIPE=true in backend/.env to confirm.',
