@@ -1,79 +1,103 @@
 # StuddyPuddy
 
-A study planner for students that prioritizes tasks by deadline and workload and suggests a study plan.
+StuddyPuddy is a study planner. You enter your deadlines and how many hours you can study on each weekday, and the app builds a day-by-day plan. It ranks tasks by urgency, spreads the hours over the days you have, and warns you when the deadlines cannot all be met.
 
-## Structure
+Each user only ever sees their own tasks, hours and plan.
 
-- `frontend/` is the React app (browser UI).
-- `backend/` is the Node.js REST API (database access, business logic).
-- `docs/` holds project documentation, including the [data model](docs/data-model.md).
+## Main function
 
-## Requirements
+The plan is built in `backend/src/core/`, which is plain TypeScript with no database or web code. For every unfinished task it works out a priority score (hours still needed divided by the available hours until the deadline, scaled by the days left). It then fills your available hours with the most urgent tasks first.
 
-- Node.js and npm (check with `node -v` and `npm -v`)
-- A MongoDB database: either a free MongoDB Atlas cluster or a local MongoDB installation (see Database below)
+If a task cannot fit before its deadline, the plan marks it "at risk" and reports how many hours do not fit. Invalid data (for example a task with 0 hours) is rejected with a clear error and never silently planned. The full rules are in `backend/src/core/README.md`.
 
-## Getting started
+## Tools and versions
 
-1. Clone the repository and switch to the `dev` branch.
-2. Install dependencies from the repository root. One install covers both parts:
+- Node.js 24.15.0 and npm 11.12.1
+- MongoDB: a local server or a free MongoDB Atlas cluster
+- Backend: Express 5, TypeScript, Mongoose 9, Zod 4, Vitest 5
+- Frontend: React, Vite, Tailwind CSS 4, shadcn/ui, React Router 8
 
-       npm install
+## Setup
 
-3. Create your local environment files from the examples and fill in the values:
+1. Install the dependencies for the whole project (backend and frontend) from the repository root:
 
-       copy backend\.env.example backend\.env
-       copy frontend\.env.example frontend\.env
+   ```
+   npm install
+   ```
 
-   On macOS or Linux, use `cp` instead of `copy`. The real `.env` files are git-ignored and must never be committed.
+2. Create the backend configuration file by copying the example:
 
-4. Set up the database and put its connection string in `backend/.env` (see below).
+   ```
+   copy backend\.env.example backend\.env
+   ```
 
-## Database
+   (On macOS or Linux: `cp backend/.env.example backend/.env`.)
 
-The backend stores its data in MongoDB. The connection string is read from the `MONGODB_URI` variable in `backend/.env`. Use a database name that is only for development, such as `studdypuddy_dev`, because the seed script below deletes everything in the database it connects to.
+3. Open `backend/.env` and set:
 
-**Atlas (hosted):**
+   | Variable         | Meaning                                                       |
+   | ---------------- | ------------------------------------------------------------- |
+   | `MONGODB_URI`    | MongoDB connection string. The default uses a local server.   |
+   | `JWT_SECRET`     | Secret for signing login tokens. Any long random string.      |
+   | `SEED_PASSWORD`  | Password given to the sample users created by `npm run seed`. |
+   | `PORT`           | Backend port. Default 3000.                                   |
+   | `CORS_ORIGIN`    | Address of the frontend. Default `http://localhost:5173`.     |
+   | `JWT_EXPIRES_IN` | How long a login lasts. Default 7d.                           |
 
-1. Create a free cluster (M0) on MongoDB Atlas.
-2. Under Security, create a database user with read and write access, using a password without special characters.
-3. Under Network Access, add your current IP address to the allowlist.
-4. Click Connect on the cluster, choose the option for connecting an application (Node.js), and copy the connection string. Replace `<username>` and `<password>` with the database user's credentials and add the database name after `.mongodb.net/`, for example:
+   To generate a secret: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-       MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.example.mongodb.net/studdypuddy_dev?appName=Cluster0
+## Run
 
-**Local:** install MongoDB Community Edition and use:
+One command starts both the backend and the frontend:
 
-    MONGODB_URI=mongodb://localhost:27017/studdypuddy_dev
+```
+npm run dev
+```
 
-**Seed data:** `npm run seed` resets the database and creates two test users (`normal@example.com` and `conflict@example.com`) with tasks and weekly availability based on the test scenarios in the design document. It refuses to run when `NODE_ENV` is `production`.
+The backend runs on http://localhost:3000 and the app on http://localhost:5173. Stop both with Ctrl+C.
 
-The collections, fields and indexes are described in [docs/data-model.md](docs/data-model.md).
+## Sample data
 
-## Running locally
+```
+npm run seed
+```
 
-    npm run dev:backend
+This creates two sample users, both with the password from `SEED_PASSWORD`:
 
-The backend connects to MongoDB first and prints `MongoDB connected`, then `API listening on port 3000`. If the connection fails, it prints an error explaining what to check and exits. To confirm the API is up, open `http://localhost:3000/api/health`.
+- `normal@example.com`: a comfortable workload with no conflicts
+- `conflict@example.com`: more work than the hours allow, so the plan shows warnings
 
-    npm run dev:frontend
+## Demo steps
 
-The backend should run first to see API status connected and it be working properly. To confirm frontend works properly open http://localhost:5173/
+1. Log in as `normal@example.com`.
+2. Open **Availability** and set 2 hours for each weekday. Save.
+3. Open **Tasks** and add a task. Tasks are listed most urgent first, each with a priority level.
+4. Open **Plan** to see the ranked tasks and the day-by-day schedule.
+5. Log out and log in as `conflict@example.com`. The dashboard and the Plan page show a warning, and the tasks that do not fit are marked "At risk".
+6. On the **Tasks** page, mark a task as completed. The plan updates and the finished task disappears from it.
+7. Log in as another user and open **Tasks**. The first user's tasks are not visible.
 
-## Code quality
+## Tests
 
-- `npm run lint` checks the code with ESLint.
-- `npm run typecheck` checks the TypeScript types.
-- `npm run format` formats everything with Prettier; `npm run format:check` only reports problems.
-- A pre-commit hook (Husky + lint-staged) lints and formats staged files and blocks the commit if lint errors remain. It installs automatically with `npm install`.
-- CI runs on every pull request to check lint, typecheck, format before allowing a person to merge.
+```
+npm test
+```
 
-## Workflow
+This runs the backend tests against an in-memory MongoDB, so no database setup is needed. The first run downloads a MongoDB binary, which needs internet access. The tests cover:
 
-Work happens on branches created from `dev`. Every change goes through a pull request, even when working alone, so that automated review and CI always run. `dev` is merged into `main` for releases.
+- the planning core: priority scores, ordering, allocation, conflicts and invalid input
+- the plan, task and availability endpoints
+- tenant isolation: one user cannot read, change or delete another user's tasks (`backend/src/routes/tasks.ownership.test.ts`), and plans are separate per user
 
-## Code review
+Coverage of the planning core: `npm run test:coverage`.
 
-Pull requests are reviewed automatically by CodeRabbit, a GitHub app installed on this repository only. The project-specific review rules (ownership checks, validated input, core logic kept separate from HTTP and database code) live in `.coderabbit.yaml`.
+## Other commands
 
-Its comments are suggestions, not decisions. Before a pull request is merged, every comment is either fixed or dismissed with a short written reason in the pull request thread, and every merged change must be understood by its author.
+- `npm run lint`, `npm run format:check`, `npm run typecheck`: code checks
+- `npm run build --workspace backend` and `npm run start --workspace backend`: production build and start of the backend
+
+## Project structure
+
+- `backend/src/core/`: the planning logic (pure functions, no database)
+- `backend/src/routes`, `controllers`, `services`, `repositories`: the request flow, one layer per folder. Only repositories touch the database, and every user-data query is scoped by user id.
+- `frontend/src/pages`, `components`, `api`, `hooks`: the React app
