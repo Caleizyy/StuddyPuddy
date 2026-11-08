@@ -16,4 +16,9 @@ describe('login limit settings', () => {
     const { config } = await import('./index.js');
     expect(config.loginRateLimit.perIp).toBe(7);
   });
+
+  it.each(['', '0', '-3', 'abc', '2.5'])('rejects PORT=%j', async (value) => {
+    vi.stubEnv('PORT', value);
+    await expect(import('./index.js')).rejects.toThrow('PORT');
+  });
 });

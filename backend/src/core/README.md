@@ -32,4 +32,4 @@ A plan with four parts:
 
 ## Errors
 
-Invalid input throws `PlanningInputError`. Its `field` property names what to fix: `deadline`, `estimatedHours` or `availability`.
+Invalid input throws `PlanningInputError`. Its `field` property names what to fix: `deadline`, `estimatedHours`, `availability` or `tasks` (more than 100 unfinished tasks).
