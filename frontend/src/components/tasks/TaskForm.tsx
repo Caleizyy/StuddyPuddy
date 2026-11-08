@@ -2,9 +2,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ApiError } from '@/api/client';
-import { createTask, type Task } from '@/api/tasks';
+import { createTask, updateTask, type Task } from '@/api/tasks';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,6 +47,18 @@ const emptyForm: TaskFormValues = {
   status: 'todo',
 };
 
+// The form edits an existing task by starting from its values
+function valuesFromTask(task: Task): TaskFormValues {
+  return {
+    title: task.title,
+    category: task.category,
+    deadline: task.deadline.slice(0, 10), // 2026-12-01T12:00:00.000Z -> 2026-12-01
+    moduleCount: task.moduleCount,
+    estimatedHours: task.estimatedHours,
+    status: task.status,
+  };
+}
+
 // The select shows the label ("Not completed") but the form keeps the value ("todo")
 const categoryItems = TASK_CATEGORIES.map((value) => ({ value, label: CATEGORY_LABELS[value] }));
 const statusItems = TASK_STATUSES.map((value) => ({ value, label: STATUS_LABELS[value] }));
@@ -57,28 +68,31 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-sm text-destructive">{message}</p>;
 }
 
-export function TaskForm({ onCreated }: { onCreated: (task: Task) => void }) {
+type TaskFormProps = {
+  task?: Task; // given: edit this task. Missing: add a new one.
+  onSaved: (task: Task) => void;
+  onCancel: () => void;
+};
+
+export function TaskForm({ task, onSaved, onCancel }: TaskFormProps) {
   const {
     register,
     control,
     handleSubmit,
-    reset,
-    setFocus,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<TaskFormValues>({ resolver: zodResolver(taskFormSchema), defaultValues: emptyForm });
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: task ? valuesFromTask(task) : emptyForm,
+  });
 
   async function onSubmit(values: TaskFormValues) {
     try {
       // The date picker gives 2026-12-01. We store it as noon UTC that day,
       // so the day count in the planner is the same in every time zone.
-      const { task } = await createTask({
-        ...values,
-        deadline: `${values.deadline}T12:00:00.000Z`,
-      });
-      onCreated(task);
-      reset(emptyForm);
-      setFocus('title');
+      const data = { ...values, deadline: `${values.deadline}T12:00:00.000Z` };
+      const result = task ? await updateTask(task.id, data) : await createTask(data);
+      onSaved(result.task);
     } catch (error) {
       if (error instanceof ApiError && Array.isArray(error.details)) {
         for (const detail of error.details as { field: string; message: string }[]) {
@@ -94,127 +108,125 @@ export function TaskForm({ onCreated }: { onCreated: (task: Task) => void }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Add a task</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
-            <FieldError message={errors.title?.message} />
-          </div>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
+      <div className="space-y-2 sm:col-span-2">
+        <Label htmlFor="title">Title</Label>
+        <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
+        <FieldError message={errors.title?.message} />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field }) => (
-                <Select
-                  items={categoryItems}
-                  value={field.value}
-                  onValueChange={(value) => {
-                    if (value) field.onChange(value);
-                  }}
-                >
-                  <SelectTrigger id="category" className="w-full" aria-invalid={!!errors.category}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Controller
+          control={control}
+          name="category"
+          render={({ field }) => (
+            <Select
+              items={categoryItems}
+              value={field.value}
+              onValueChange={(value) => {
+                if (value) field.onChange(value);
+              }}
+            >
+              <SelectTrigger id="category" className="w-full" aria-invalid={!!errors.category}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        <FieldError message={errors.category?.message} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="deadline">Deadline</Label>
+        <Controller
+          control={control}
+          name="deadline"
+          render={({ field }) => (
+            <DatePicker
+              id="deadline"
+              value={field.value}
+              onChange={field.onChange}
+              invalid={!!errors.deadline}
             />
-            <FieldError message={errors.category?.message} />
-          </div>
+          )}
+        />
+        <FieldError message={errors.deadline?.message} />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="deadline">Deadline</Label>
-            <Controller
-              control={control}
-              name="deadline"
-              render={({ field }) => (
-                <DatePicker
-                  id="deadline"
-                  value={field.value}
-                  onChange={field.onChange}
-                  invalid={!!errors.deadline}
-                />
-              )}
-            />
-            <FieldError message={errors.deadline?.message} />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="moduleCount">Modules or topics</Label>
+        <Input
+          id="moduleCount"
+          type="number"
+          min={1}
+          step={1}
+          aria-invalid={!!errors.moduleCount}
+          {...register('moduleCount', { valueAsNumber: true })}
+        />
+        <FieldError message={errors.moduleCount?.message} />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="moduleCount">Modules or topics</Label>
-            <Input
-              id="moduleCount"
-              type="number"
-              min={1}
-              step={1}
-              aria-invalid={!!errors.moduleCount}
-              {...register('moduleCount', { valueAsNumber: true })}
-            />
-            <FieldError message={errors.moduleCount?.message} />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="estimatedHours">Estimated hours</Label>
+        <Input
+          id="estimatedHours"
+          type="number"
+          min={0.25}
+          step={0.25}
+          aria-invalid={!!errors.estimatedHours}
+          {...register('estimatedHours', { valueAsNumber: true })}
+        />
+        <FieldError message={errors.estimatedHours?.message} />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="estimatedHours">Estimated hours</Label>
-            <Input
-              id="estimatedHours"
-              type="number"
-              min={0.25}
-              step={0.25}
-              aria-invalid={!!errors.estimatedHours}
-              {...register('estimatedHours', { valueAsNumber: true })}
-            />
-            <FieldError message={errors.estimatedHours?.message} />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Controller
+          control={control}
+          name="status"
+          render={({ field }) => (
+            <Select
+              items={statusItems}
+              value={field.value}
+              onValueChange={(value) => {
+                if (value) field.onChange(value);
+              }}
+            >
+              <SelectTrigger id="status" className="w-full" aria-invalid={!!errors.status}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        <FieldError message={errors.status?.message} />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <Select
-                  items={statusItems}
-                  value={field.value}
-                  onValueChange={(value) => {
-                    if (value) field.onChange(value);
-                  }}
-                >
-                  <SelectTrigger id="status" className="w-full" aria-invalid={!!errors.status}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            <FieldError message={errors.status?.message} />
-          </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <FieldError message={errors.root?.message} />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add task'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+      <div className="space-y-2 sm:col-span-2">
+        <FieldError message={errors.root?.message} />
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : task ? 'Save changes' : 'Add task'}
+          </Button>
+        </div>
+      </div>
+    </form>
   );
 }

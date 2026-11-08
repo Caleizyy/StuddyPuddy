@@ -15,6 +15,13 @@ export type Task = {
 
 export type NewTask = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
 
+export type TaskChanges = Partial<NewTask>;
+
+export const updateTask = (id: string, changes: TaskChanges) =>
+  api.patch<{ task: Task }>(`/tasks/${id}`, changes);
+
+export const deleteTask = (id: string) => api.delete<void>(`/tasks/${id}`);
+
 export const listTasks = () => api.get<{ tasks: Task[] }>('/tasks');
 
 export const createTask = (data: NewTask) => api.post<{ task: Task }>('/tasks', data);
