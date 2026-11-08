@@ -7,12 +7,12 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: {
       NODE_ENV: 'test',
-      MONGODB_URI: 'mongodb://localhost:27017/studdypuddy_test',
-      BCRYPT_ROUNDS: '4',
-      JWT_SECRET: 'test-secret-test-secret-test-secret-1234',
-      LOGIN_LIMIT_PER_IP: '1000',
-      LOGIN_LIMIT_PER_EMAIL: '1000',
+      JWT_SECRET: 'test-only-secret-that-is-at-least-32-characters-long',
+      JWT_EXPIRES_IN: '7d',
+      CORS_ORIGIN: 'http://localhost:5173',
+      MONGODB_URI: 'mongodb://localhost:27017/studdypuddy-test',
     },
+
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
