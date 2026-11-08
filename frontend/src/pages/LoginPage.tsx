@@ -41,7 +41,7 @@ export function LoginPage() {
   async function onSubmit(values: LoginForm) {
     try {
       await login(values.email, values.password);
-      navigate(destination, { replace: true });
+      void navigate(destination, { replace: true });
     } catch (error) {
       setError('root', {
         message:
