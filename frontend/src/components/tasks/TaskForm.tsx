@@ -2,7 +2,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ApiError } from '@/api/client';
-import { createTask, updateTask, type Task } from '@/api/tasks';
+import { createTask, updateTask, type Task, type TaskChanges } from '@/api/tasks';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -80,7 +80,7 @@ export function TaskForm({ task, onSaved, onCancel }: TaskFormProps) {
     control,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: task ? valuesFromTask(task) : emptyForm,
@@ -88,13 +88,34 @@ export function TaskForm({ task, onSaved, onCancel }: TaskFormProps) {
 
   async function onSubmit(values: TaskFormValues) {
     try {
-      const deadline =
-        task && values.deadline === task.deadline.slice(0, 10)
-          ? task.deadline
-          : `${values.deadline}T12:00:00.000Z`;
-      const data = { ...values, deadline };
-      const result = task ? await updateTask(task.id, data) : await createTask(data);
-      onSaved(result.task);
+      if (!task) {
+        // The date picker gives 2026-12-01. We store it as noon UTC that day,
+        // so the day count in the planner is the same in every time zone.
+        const created = await createTask({
+          ...values,
+          deadline: `${values.deadline}T12:00:00.000Z`,
+        });
+        onSaved(created.task);
+        return;
+      }
+
+      // Editing: send only the fields the user changed, so an old value in this form
+      // cannot overwrite a newer change made elsewhere (for example in another tab)
+      const changes: TaskChanges = {};
+      if (dirtyFields.title) changes.title = values.title;
+      if (dirtyFields.category) changes.category = values.category;
+      if (dirtyFields.deadline) changes.deadline = `${values.deadline}T12:00:00.000Z`;
+      if (dirtyFields.moduleCount) changes.moduleCount = values.moduleCount;
+      if (dirtyFields.estimatedHours) changes.estimatedHours = values.estimatedHours;
+      if (dirtyFields.status) changes.status = values.status;
+
+      if (Object.keys(changes).length === 0) {
+        onCancel(); // nothing was changed, so there is nothing to save
+        return;
+      }
+
+      const updated = await updateTask(task.id, changes);
+      onSaved(updated.task);
     } catch (error) {
       if (error instanceof ApiError && Array.isArray(error.details)) {
         for (const detail of error.details as { field: string; message: string }[]) {
