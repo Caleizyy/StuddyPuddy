@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CATEGORY_LABELS, STATUS_LABELS, TASK_CATEGORIES, TASK_STATUSES } from '@/lib/taskOptions';
+import { FieldError } from '@/components/ui/field-error';
 
 const taskFormSchema = z.object({
   title: z
@@ -62,11 +63,6 @@ function valuesFromTask(task: Task): TaskFormValues {
 // The select shows the label ("Not completed") but the form keeps the value ("todo")
 const categoryItems = TASK_CATEGORIES.map((value) => ({ value, label: CATEGORY_LABELS[value] }));
 const statusItems = TASK_STATUSES.map((value) => ({ value, label: STATUS_LABELS[value] }));
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <p className="text-sm text-destructive">{message}</p>;
-}
 
 type TaskFormProps = {
   task?: Task; // given: edit this task. Missing: add a new one.
