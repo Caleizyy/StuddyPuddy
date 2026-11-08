@@ -20,6 +20,7 @@ export default [
     rules: {
       ...react.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off', // TypeScript already checks props
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },

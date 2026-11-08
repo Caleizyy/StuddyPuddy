@@ -9,10 +9,19 @@ export function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
 
+  function byDeadline(a: Task, b: Task) {
+    return a.deadline.localeCompare(b.deadline);
+  }
+
   useEffect(() => {
     listTasks()
       .then((result) => {
-        setTasks(result.tasks);
+        // Keep any task that was created while the list was still loading
+        setTasks((current) => {
+          const loadedIds = new Set(result.tasks.map((task) => task.id));
+          const createdMeanwhile = current.filter((task) => !loadedIds.has(task.id));
+          return [...result.tasks, ...createdMeanwhile].sort(byDeadline);
+        });
         setLoadState('ready');
       })
       .catch(() => setLoadState('error'));
@@ -20,7 +29,7 @@ export function TasksPage() {
 
   // Add the new task and keep the list ordered by deadline
   function handleCreated(task: Task) {
-    setTasks((current) => [...current, task].sort((a, b) => a.deadline.localeCompare(b.deadline)));
+    setTasks((current) => [...current, task].sort(byDeadline));
   }
 
   return (
