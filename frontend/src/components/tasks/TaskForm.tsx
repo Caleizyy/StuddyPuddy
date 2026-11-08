@@ -88,9 +88,11 @@ export function TaskForm({ task, onSaved, onCancel }: TaskFormProps) {
 
   async function onSubmit(values: TaskFormValues) {
     try {
-      // The date picker gives 2026-12-01. We store it as noon UTC that day,
-      // so the day count in the planner is the same in every time zone.
-      const data = { ...values, deadline: `${values.deadline}T12:00:00.000Z` };
+      const deadline =
+        task && values.deadline === task.deadline.slice(0, 10)
+          ? task.deadline
+          : `${values.deadline}T12:00:00.000Z`;
+      const data = { ...values, deadline };
       const result = task ? await updateTask(task.id, data) : await createTask(data);
       onSaved(result.task);
     } catch (error) {
