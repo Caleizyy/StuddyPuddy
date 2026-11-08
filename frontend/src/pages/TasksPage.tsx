@@ -1,25 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
+import type { PlanItem } from '@/api/plan';
 import { ApiError } from '@/api/client';
 import { listTasks, updateTask, type Task } from '@/api/tasks';
 import { DeleteTaskDialog } from '@/components/tasks/DeleteTaskDialog';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDialog } from '@/components/tasks/TaskDialog';
 import { Button } from '@/components/ui/button';
+import { usePlan } from '@/hooks/usePlan';
 
 type LoadState = 'loading' | 'ready' | 'error';
+type PlanInfo = Map<string, { item: PlanItem; rank: number }>;
 
-// Unfinished tasks first, then by deadline
-function sortTasks(a: Task, b: Task) {
+// Unfinished tasks first, in plan (priority) order. Tasks the plan doesn't know yet go after them, by deadline.
+function compareTasks(a: Task, b: Task, planInfo: PlanInfo) {
   const aDone = a.status === 'done';
   const bDone = b.status === 'done';
   if (aDone !== bDone) return aDone ? 1 : -1;
+
+  const aRank = planInfo.get(a.id)?.rank;
+  const bRank = planInfo.get(b.id)?.rank;
+  if (aRank !== undefined && bRank !== undefined) return aRank - bRank;
+  if (aRank !== undefined) return -1;
+  if (bRank !== undefined) return 1;
   return a.deadline.localeCompare(b.deadline);
 }
 
 // Replaces the task with the same id, or adds it when it is new
 function upsert(list: Task[], task: Task): Task[] {
-  return [...list.filter((item) => item.id !== task.id), task].sort(sortTasks);
+  return [...list.filter((item) => item.id !== task.id), task];
 }
 
 export function TasksPage() {
@@ -30,6 +39,7 @@ export function TasksPage() {
   const [deleting, setDeleting] = useState<Task | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const { state: planState, reload: reloadPlan } = usePlan();
 
   useEffect(() => {
     listTasks()
@@ -38,21 +48,37 @@ export function TasksPage() {
         setTasks((current) => {
           const loadedIds = new Set(result.tasks.map((task) => task.id));
           const createdMeanwhile = current.filter((task) => !loadedIds.has(task.id));
-          return [...result.tasks, ...createdMeanwhile].sort(sortTasks);
+          return [...result.tasks, ...createdMeanwhile];
         });
         setLoadState('ready');
       })
       .catch(() => setLoadState('error'));
   }, []);
 
+  // The plan, looked up by task id, with each task's position in the priority order
+  const planInfo = useMemo(() => {
+    const info: PlanInfo = new Map();
+    if (planState.status === 'ready') {
+      planState.plan.items.forEach((item, rank) => info.set(item.taskId, { item, rank }));
+    }
+    return info;
+  }, [planState]);
+
+  const sortedTasks = useMemo(
+    () => [...tasks].sort((a, b) => compareTasks(a, b, planInfo)),
+    [tasks, planInfo],
+  );
+
   function handleSaved(task: Task) {
     setTasks((current) => upsert(current, task));
     setEditor(null);
+    reloadPlan();
   }
 
   function handleDeleted(taskId: string) {
     setTasks((current) => current.filter((task) => task.id !== taskId));
     setDeleting(null);
+    reloadPlan();
   }
 
   async function handleToggleDone(task: Task) {
@@ -63,6 +89,7 @@ export function TasksPage() {
         status: task.status === 'done' ? 'todo' : 'done',
       });
       setTasks((current) => upsert(current, result.task));
+      reloadPlan();
     } catch (error) {
       setActionError(
         error instanceof ApiError ? error.message : 'Could not update the task. Please try again.',
@@ -83,7 +110,7 @@ export function TasksPage() {
           {loadState === 'ready' && tasks.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {openTasks.length} open · {tasks.length - openTasks.length} done · {hoursLeft} h of
-              work left
+              work left · most urgent first
             </p>
           )}
         </div>
@@ -105,10 +132,11 @@ export function TasksPage() {
       )}
       {loadState === 'ready' && tasks.length > 0 && (
         <ul className="space-y-3">
-          {tasks.map((task) => (
+          {sortedTasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}
+              priority={planInfo.get(task.id)?.item}
               busy={busyId === task.id}
               onToggleDone={() => void handleToggleDone(task)}
               onEdit={() => setEditor({ task })}

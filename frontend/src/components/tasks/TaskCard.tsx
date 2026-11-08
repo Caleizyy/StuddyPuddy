@@ -10,6 +10,9 @@ import {
   type TaskStatus,
 } from '@/lib/taskOptions';
 import { cn } from '@/lib/utils';
+import type { PlanItem } from '@/api/plan';
+import { PriorityBadge } from '@/components/plan/PriorityBadge';
+import { formatScore } from '@/lib/priority';
 
 const CATEGORY_DOT: Record<TaskCategory, string> = {
   homework: 'bg-chart-1',
@@ -30,9 +33,10 @@ type TaskCardProps = {
   onToggleDone: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  priority?: PlanItem;
 };
 
-export function TaskCard({ task, busy, onToggleDone, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task, busy, onToggleDone, onEdit, onDelete, priority }: TaskCardProps) {
   const isDone = task.status === 'done';
   const deadline = describeDeadline(task.deadline);
 
@@ -53,6 +57,14 @@ export function TaskCard({ task, busy, onToggleDone, onEdit, onDelete }: TaskCar
           <Badge variant={deadline.overdue ? 'destructive' : 'outline'}>{deadline.label}</Badge>
         )}
       </div>
+
+      {!isDone && priority && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+          <PriorityBadge band={priority.band} />
+          <span className="text-muted-foreground">score {formatScore(priority.priorityScore)}</span>
+          {priority.atRisk && <Badge variant="destructive">At risk</Badge>}
+        </div>
+      )}
 
       <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="flex items-center gap-1.5">

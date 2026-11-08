@@ -9,6 +9,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { TasksPage } from './pages/TasksPage';
 import { AvailabilityPage } from './pages/AvailabilityPage';
+import { PlanPage } from './pages/PlanPage';
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +23,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/tasks', element: <TasksPage /> },
-          { path: '/plan', element: <ComingSoonPage title="Plan" /> },
+          { path: '/plan', element: <PlanPage /> },
           { path: '/profile', element: <ComingSoonPage title="Profile" /> },
           { path: '/availability', element: <AvailabilityPage /> },
         ],
