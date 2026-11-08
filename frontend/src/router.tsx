@@ -7,6 +7,7 @@ import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { RegisterPage } from '@/pages/RegisterPage';
+import { TasksPage } from './pages/TasksPage';
 
 export const router = createBrowserRouter([
   {
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
-          { path: '/tasks', element: <ComingSoonPage title="Tasks" /> },
+          { path: '/tasks', element: <TasksPage /> },
           { path: '/plan', element: <ComingSoonPage title="Plan" /> },
           { path: '/availability', element: <ComingSoonPage title="Availability" /> },
           { path: '/profile', element: <ComingSoonPage title="Profile" /> },

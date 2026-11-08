@@ -15,11 +15,11 @@ export const createTaskSchema = z.object({
     .min(0.25, 'At least 0.25 hours')
     .max(MAX_TASK_HOURS, `At most ${MAX_TASK_HOURS} hours`)
     .refine(isQuarterHours, 'Use steps of 0.25 hours'),
+  status: z.enum(TASK_STATUSES).optional(),
 });
 
 // Editing: every field is optional, and a task can also change status (this is how "done" works)
 export const updateTaskSchema = createTaskSchema
-  .extend({ status: z.enum(TASK_STATUSES) })
   .partial()
   .refine((fields) => Object.keys(fields).length > 0, 'Send at least one field to change');
 
