@@ -8,7 +8,7 @@ Each user only ever sees their own tasks, hours and plan.
 
 The plan is built in `backend/src/core/`, which is plain TypeScript with no database or web code. For every unfinished task it works out a priority score (hours still needed divided by the available hours until the deadline, scaled by the days left). It then fills your available hours with the most urgent tasks first.
 
-If a task cannot fit before its deadline, the plan marks it "at risk" and reports how many hours do not fit. Invalid data (for example a task with 0 hours) is rejected with a clear error and never silently planned. The full rules are in `backend/src/core/README.md`.
+If the hours do not stretch far enough, the plan says so. Any task that does not fully fit gets a warning with the number of hours left unscheduled. A task is also marked "At risk" when it cannot be finished before its own deadline even if it had all your hours, or when it is overdue or you have no study time. A task can have unscheduled hours without being at risk, because earlier, more urgent tasks used up the shared hours first. Invalid data (for example a task with 0 hours) is rejected with a clear error and never silently planned. The full rules are in `backend/src/core/README.md`.
 
 ## Tools and versions
 
@@ -73,7 +73,7 @@ This creates two sample users, both with the password from `SEED_PASSWORD`:
 2. Open **Availability** and set 2 hours for each weekday. Save.
 3. Open **Tasks** and add a task. Tasks are listed most urgent first, each with a priority level.
 4. Open **Plan** to see the ranked tasks and the day-by-day schedule.
-5. Log out and log in as `conflict@example.com`. The dashboard and the Plan page show a warning, and the tasks that do not fit are marked "At risk".
+5. Log out and log in as `conflict@example.com`. The dashboard and the Plan page show a warning. The long task is marked "At risk", and the short one shows how many hours do not fit.
 6. On the **Tasks** page, mark a task as completed. The plan updates and the finished task disappears from it.
 7. Log in as another user and open **Tasks**. The first user's tasks are not visible.
 
