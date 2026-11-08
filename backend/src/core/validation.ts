@@ -1,7 +1,8 @@
 import { PlanningInputError } from './errors.js';
 import type { PlanTask } from './types.js';
 
-export const MAX_TASK_HOURS = 1000;
+export const MAX_TASK_HOURS = 200;
+export const MAX_OPEN_TASKS = 100;
 
 export function isQuarterHours(value: number): boolean {
   return value % 0.25 === 0;

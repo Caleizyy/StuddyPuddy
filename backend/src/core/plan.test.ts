@@ -4,6 +4,7 @@ import { PlanningInputError } from './errors.js';
 import { buildPlan } from './plan.js';
 import type { PlanTask } from './types.js';
 import { dateKey } from './dates.js';
+import { MAX_OPEN_TASKS } from './validation.js';
 
 const now = new Date('2026-11-09T10:00:00Z'); // a Monday
 const everyDay = (hours: number) => Array<number>(7).fill(hours);
@@ -195,19 +196,19 @@ describe('buildPlan', () => {
   });
 
   it('keeps a plan feasible when the deadline is more than a year away', () => {
-    // 700 hours at 2 hours a day needs 350 days, and the deadline is 400 days away
+    // 100 hours at a quarter hour a day needs 400 days, and the deadline is 500 days away
     const plan = buildPlan({
-      tasks: [task('Thesis', 400, 700)],
-      hoursByWeekday: everyDay(2),
+      tasks: [task('Thesis', 500, 100)],
+      hoursByWeekday: everyDay(0.25),
       now,
     });
     expect(plan.feasible).toBe(true);
-    expect(plan.items[0].scheduledHours).toBe(700);
-    expect(plan.schedule).toHaveLength(350);
+    expect(plan.items[0].scheduledHours).toBe(100);
+    expect(plan.schedule).toHaveLength(400);
   });
 
   it('rejects hours that are too large or not in quarter-hour steps', () => {
-    for (const hours of [1001, 1.3]) {
+    for (const hours of [201, 1.3]) {
       const error = errorFrom(() =>
         buildPlan({ tasks: [task('Bad', 2, hours)], hoursByWeekday: everyDay(2), now }),
       );
@@ -218,5 +219,21 @@ describe('buildPlan', () => {
       buildPlan({ tasks: [], hoursByWeekday: [0.1, 2, 2, 2, 2, 2, 2], now }),
     );
     expect(availabilityError).toMatchObject({ field: 'availability' });
+  });
+
+  it('rejects more unfinished tasks than the limit', () => {
+    const tasks = Array.from({ length: MAX_OPEN_TASKS + 1 }, (_, i) => task(`Task ${i}`, 10, 1));
+    const error = errorFrom(() => buildPlan({ tasks, hoursByWeekday: everyDay(2), now }));
+    expect(error).toMatchObject({ field: 'tasks' });
+  });
+
+  it('does not count finished tasks towards the limit', () => {
+    const open = Array.from({ length: MAX_OPEN_TASKS }, (_, i) => task(`Open ${i}`, 10, 1));
+    const done = Array.from({ length: 50 }, (_, i) => ({
+      ...task(`Done ${i}`, 10, 1),
+      status: 'done' as const,
+    }));
+    const plan = buildPlan({ tasks: [...open, ...done], hoursByWeekday: everyDay(2), now });
+    expect(plan.items).toHaveLength(MAX_OPEN_TASKS);
   });
 });

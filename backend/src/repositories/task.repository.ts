@@ -44,3 +44,7 @@ export async function deleteTaskForUser(
   if (!isObjectIdOrHexString(taskId)) return null;
   return TaskModel.findOneAndDelete({ _id: taskId, userId });
 }
+
+export async function countOpenTasksForUser(userId: string): Promise<number> {
+  return TaskModel.countDocuments({ userId, status: { $ne: 'done' } });
+}

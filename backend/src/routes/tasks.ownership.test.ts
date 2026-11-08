@@ -6,6 +6,7 @@ import { createApp } from '../app.js';
 import { TaskModel } from '../models/task.js';
 import { UserModel } from '../models/user.js';
 import { signToken } from '../utils/token.js';
+import { MAX_OPEN_TASKS } from '../core/validation.js';
 
 const app = createApp();
 let mongod: MongoMemoryServer;
@@ -138,6 +139,25 @@ describe('creating and reading your own tasks', () => {
     expect(chosen.body.task.status).toBe('in_progress');
     expect(none.body.task.status).toBe('todo');
   });
+
+  it('stops a user from creating more unfinished tasks than the limit', async () => {
+    await TaskModel.insertMany(
+      Array.from({ length: MAX_OPEN_TASKS }, (_, i) => ({
+        userId: adaId,
+        title: `Task ${i}`,
+        category: 'homework',
+        deadline: new Date('2026-12-01T12:00:00Z'),
+        moduleCount: 1,
+        estimatedHours: 1,
+      })),
+    );
+
+    const response = await asUser(tokenAda).create(physicsLab);
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe('TASK_LIMIT_REACHED');
+
+    expect((await asUser(tokenBen).create(physicsLab)).status).toBe(201);
+  });
 });
 
 describe("another user's task", () => {
@@ -208,7 +228,7 @@ describe('invalid tasks are rejected', () => {
       { ...physicsLab, deadline: 'tomorrow' },
       { ...physicsLab, estimatedHours: 0 },
       { ...physicsLab, estimatedHours: 1.3 },
-      { ...physicsLab, estimatedHours: 1001 },
+      { ...physicsLab, estimatedHours: 201 },
       { ...physicsLab, moduleCount: 0 },
       { ...physicsLab, status: 'finished' },
     ];

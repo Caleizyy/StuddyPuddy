@@ -32,7 +32,7 @@ const taskFormSchema = z.object({
   estimatedHours: z
     .number({ error: 'Enter the estimated hours' })
     .min(0.25, 'At least 0.25 hours')
-    .max(1000, 'At most 1000 hours')
+    .max(200, 'At most 200 hours')
     .refine((hours) => hours % 0.25 === 0, 'Use steps of 0.25 hours'),
   status: z.enum(TASK_STATUSES),
 });

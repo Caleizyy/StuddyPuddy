@@ -8,6 +8,8 @@ import {
 } from '../repositories/task.repository.js';
 import type { CreateTaskInput, UpdateTaskInput } from '../schemas/task.schema.js';
 import { AppError } from '../utils/AppError.js';
+import { MAX_OPEN_TASKS } from '../core/validation.js';
+import { countOpenTasksForUser } from '../repositories/task.repository.js';
 
 function toTaskDto(task: TaskRecord) {
   return {
@@ -39,6 +41,13 @@ export async function getTask(userId: string, taskId: string) {
 }
 
 export async function createTask(userId: string, input: CreateTaskInput) {
+  if (input.status !== 'done' && (await countOpenTasksForUser(userId)) >= MAX_OPEN_TASKS) {
+    throw new AppError(
+      409,
+      'TASK_LIMIT_REACHED',
+      `You can have at most ${MAX_OPEN_TASKS} unfinished tasks. Finish or delete some first.`,
+    );
+  }
   const task = await createTaskForUser(userId, input);
   return toTaskDto(task);
 }
