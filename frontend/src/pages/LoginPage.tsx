@@ -9,6 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 
+// Where to go after logging in: the page the user was sent away from, or the dashboard
+function destinationFrom(state: unknown): string {
+  const from = (state as { from?: unknown } | null)?.from;
+  const isSafePath =
+    typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && from !== '/login';
+  return isSafePath ? from : '/dashboard';
+}
+
 const loginSchema = z.object({
   email: z.string().trim().min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required'),
@@ -21,6 +29,7 @@ export function LoginPage() {
   const location = useLocation();
   const { login, status } = useAuth();
   const state = location.state as { from?: string; registered?: boolean } | null;
+  const destination = destinationFrom(location.state);
 
   const {
     register,
@@ -32,7 +41,7 @@ export function LoginPage() {
   async function onSubmit(values: LoginForm) {
     try {
       await login(values.email, values.password);
-      void navigate(state?.from ?? '/dashboard', { replace: true });
+      navigate(destination, { replace: true });
     } catch (error) {
       setError('root', {
         message:
@@ -41,7 +50,7 @@ export function LoginPage() {
     }
   }
 
-  if (status === 'authenticated') return <Navigate to="/dashboard" replace />;
+  if (status === 'authenticated') return <Navigate to={destination} replace />;
   return (
     <main className="mx-auto max-w-md p-8">
       <Card>

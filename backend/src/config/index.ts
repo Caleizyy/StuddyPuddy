@@ -28,7 +28,7 @@ function positiveIntFromEnv(name: string, fallback: number): number {
 
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
-  port: Number(process.env.PORT ?? 3000),
+  port: positiveIntFromEnv('PORT', 3000),
   mongoUri: required('MONGODB_URI'),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   bcryptRounds,
@@ -40,4 +40,5 @@ export const config = {
     perIp: positiveIntFromEnv('LOGIN_LIMIT_PER_IP', 20),
     perEmail: positiveIntFromEnv('LOGIN_LIMIT_PER_EMAIL', 5),
   },
+  allowSeedWipe: process.env.ALLOW_SEED_WIPE === 'true',
 };

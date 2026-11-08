@@ -58,4 +58,11 @@ describe('POST /api/auth/register', () => {
     expect(fields).toEqual(expect.arrayContaining(['name', 'email', 'password']));
     expect(userRepository.createUser).not.toHaveBeenCalled();
   });
+
+  it('answers 404 with NOT_FOUND for a route that does not exist', async () => {
+    const response = await request(app).get('/api/does-not-exist');
+
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe('NOT_FOUND');
+  });
 });

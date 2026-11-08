@@ -69,7 +69,7 @@ This creates two sample users, both with the password from `SEED_PASSWORD`:
 - `normal@example.com`: a comfortable workload with no conflicts
 - `conflict@example.com`: more work than the hours allow, so the plan shows warnings
 
-The seed command deletes all users, tasks, and availability records in the configured database. Use a disposable database and back up existing data before running it.
+The seed deletes all existing users, tasks and availability in the configured database before creating the sample users, so it refuses to run unless `ALLOW_SEED_WIPE=true` is set in `backend/.env`. Only use it on a database you can wipe.
 
 ## Demo steps
 

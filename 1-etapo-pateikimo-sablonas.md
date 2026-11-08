@@ -242,7 +242,9 @@ Rengiant šį dokumentą buvo naudojamas ChatGPT kaip AI pagalbinė priemonė. J
 
 **Dirbtinio intelekto naudojimas kodo peržiūrai.** Šio projekto pull request'us automatiškai peržiūri CodeRabbit – DI kodo peržiūros įrankis, įdiegtas kaip GitHub programėlė tik šioje saugykloje. Įrankis nuskaito kiekviename pull request'e pakeistą kodą ir palieka komentarus bei santrauką. Projektui specifinės peržiūros taisyklės (kiekvieno įrašo priklausymo prisijungusiam naudotojui tikrinimas, visų įvesties duomenų validavimas, planavimo logikos (core/) atskyrimas nuo HTTP ir duomenų bazės kodo) saugomos saugyklos faile .coderabbit.yaml.
 
-Įrankio komentarai yra tik pasiūlymai: prieš sujungiant pakeitimus kiekvienas komentaras arba pataisomas, arba atmetamas nurodant priežastį, o kūrėjas privalo suprasti kiekvieną sujungiamą pakeitimą. Prieš pradedant naudoti įrankį buvo patikrintos kursų ir universiteto taisyklės dėl kodo siuntimo išorinėms paslaugoms [čia įrašykite patikrinimo rezultatą ir kas jį patvirtino].
+Įrankio komentarai yra tik pasiūlymai: prieš sujungiant pakeitimus kiekvienas komentaras arba pataisomas, arba atmetamas nurodant priežastį, o kūrėjas privalo suprasti kiekvieną sujungiamą pakeitimą. Prieš pradedant naudoti įrankį buvo patikrintos kursų ir universiteto taisyklės dėl kodo siuntimo išorinėms paslaugoms.
+
+Patikrinimas: autorius (Salvijus Grambovskis) peržiūrėjo kurso reikalavimus ir universiteto taisykles ir nerado draudimo siųsti kodą į išorines paslaugas (CodeRabbit, SonarQube, dirbtinio intelekto asistentą). Papildomo dėstytojo patvirtinimo negauta.
 
 **Ar AI bus sistemos funkcionalumo dalis:** Neplanuojama
 

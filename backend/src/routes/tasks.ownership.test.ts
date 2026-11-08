@@ -269,4 +269,19 @@ describe('invalid tasks are rejected', () => {
     const id = await adaCreatesTask();
     expect((await asUser(tokenAda).update(id, {})).status).toBe(400);
   });
+
+  it('applies the same hours rules when editing a task', async () => {
+    const id = await adaCreatesTask();
+
+    for (const estimatedHours of [1.3, 0, 201]) {
+      const response = await asUser(tokenAda).update(id, { estimatedHours });
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    }
+    expect((await TaskModel.findById(id))?.estimatedHours).toBe(3); // unchanged
+
+    const valid = await asUser(tokenAda).update(id, { estimatedHours: 1.25 });
+    expect(valid.status).toBe(200);
+    expect(valid.body.task.estimatedHours).toBe(1.25);
+  });
 });
