@@ -9,6 +9,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@types/node": "^26.6.5",
+    "concurrently": "^10.0.7",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -30,7 +31,8 @@
     "seed": "npm run seed --workspace backend",
     "dev:frontend": "npm run dev --workspace frontend",
     "test": "npm run test --workspaces --if-present",
-    "test:coverage": "npm run test:coverage --workspace backend"
+    "test:coverage": "npm run test:coverage --workspace backend",
+    "dev": "concurrently -n backend,frontend -c cyan,magenta \"npm:dev:backend\" \"npm:dev:frontend\""
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0"
