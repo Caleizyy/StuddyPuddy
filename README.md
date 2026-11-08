@@ -44,6 +44,8 @@ If the hours do not stretch far enough, the plan says so. Any task that does not
    | `CORS_ORIGIN`    | Address of the frontend. Default `http://localhost:5173`.     |
    | `JWT_EXPIRES_IN` | How long a login lasts. Default 7d.                           |
 
+   If you change `PORT`, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL` to the backend address. For example, use `http://localhost:3001` for `PORT=3001`.
+
    To generate a secret: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
 ## Run
@@ -66,6 +68,8 @@ This creates two sample users, both with the password from `SEED_PASSWORD`:
 
 - `normal@example.com`: a comfortable workload with no conflicts
 - `conflict@example.com`: more work than the hours allow, so the plan shows warnings
+
+The seed command deletes all users, tasks, and availability records in the configured database. Use a disposable database and back up existing data before running it.
 
 ## Demo steps
 
