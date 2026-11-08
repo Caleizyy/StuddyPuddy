@@ -22,6 +22,20 @@ const physicsLab = {
   estimatedHours: 3,
 };
 
+// Gives Ada exactly the maximum number of unfinished tasks
+async function fillToLimit() {
+  await TaskModel.insertMany(
+    Array.from({ length: MAX_OPEN_TASKS }, (_, i) => ({
+      userId: adaId,
+      title: `Task ${i}`,
+      category: 'homework',
+      deadline: new Date('2026-12-01T12:00:00Z'),
+      moduleCount: 1,
+      estimatedHours: 1,
+    })),
+  );
+}
+
 // The first run downloads a MongoDB binary, so this step gets extra time
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create();
@@ -141,22 +155,33 @@ describe('creating and reading your own tasks', () => {
   });
 
   it('stops a user from creating more unfinished tasks than the limit', async () => {
-    await TaskModel.insertMany(
-      Array.from({ length: MAX_OPEN_TASKS }, (_, i) => ({
-        userId: adaId,
-        title: `Task ${i}`,
-        category: 'homework',
-        deadline: new Date('2026-12-01T12:00:00Z'),
-        moduleCount: 1,
-        estimatedHours: 1,
-      })),
-    );
+    await fillToLimit();
 
     const response = await asUser(tokenAda).create(physicsLab);
     expect(response.status).toBe(409);
     expect(response.body.error.code).toBe('TASK_LIMIT_REACHED');
 
     expect((await asUser(tokenBen).create(physicsLab)).status).toBe(201);
+  });
+
+  it('stops a finished task from being reopened past the limit', async () => {
+    const id = await adaCreatesTask();
+    await asUser(tokenAda).update(id, { status: 'done' });
+    await fillToLimit();
+
+    const reopen = await asUser(tokenAda).update(id, { status: 'todo' });
+    expect(reopen.status).toBe(409);
+    expect(reopen.body.error.code).toBe('TASK_LIMIT_REACHED');
+    expect((await TaskModel.findById(id))?.status).toBe('done'); // unchanged
+
+    // Editing a task that is already unfinished is still allowed
+    const unfinished = await TaskModel.findOne({ userId: adaId, title: 'Task 0' });
+    const edit = await asUser(tokenAda).update(unfinished!.id, { title: 'Renamed' });
+    expect(edit.status).toBe(200);
+
+    // Once there is room again, the task can be reopened
+    await TaskModel.deleteOne({ _id: unfinished!.id });
+    expect((await asUser(tokenAda).update(id, { status: 'todo' })).status).toBe(200);
   });
 });
 
