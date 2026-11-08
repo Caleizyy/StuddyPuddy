@@ -28,7 +28,7 @@ export async function getPlanForUser(userId: string, now: Date) {
     // The core says which field is wrong. We turn that into a normal API error.
     if (error instanceof PlanningInputError) {
       throw new AppError(422, 'PLANNING_INPUT_INVALID', error.message, [
-        { field: error.field, message: error.message },
+        { field: error.field, message: error.message, taskId: error.taskId },
       ]);
     }
     throw error;

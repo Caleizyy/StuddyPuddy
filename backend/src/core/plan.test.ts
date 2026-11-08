@@ -151,7 +151,7 @@ describe('buildPlan', () => {
         buildPlan({ tasks: [task('Bad', 2, hours)], hoursByWeekday: everyDay(2), now }),
       );
       expect(error).toBeInstanceOf(PlanningInputError);
-      expect(error).toMatchObject({ field: 'estimatedHours' });
+      expect(error).toMatchObject({ field: 'estimatedHours', taskId: expect.any(String) });
     }
   });
 

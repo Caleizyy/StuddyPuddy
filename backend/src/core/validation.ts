@@ -10,15 +10,21 @@ export function isQuarterHours(value: number): boolean {
 
 export function validateTask(task: PlanTask): void {
   if (Number.isNaN(task.deadline.getTime())) {
-    throw new PlanningInputError('deadline', 'Deadline is required');
+    throw new PlanningInputError('deadline', `"${task.title}": deadline is required`, task.id);
   }
+  // Number.isFinite is false for NaN, Infinity and -Infinity
   if (!Number.isFinite(task.estimatedHours) || task.estimatedHours <= 0) {
-    throw new PlanningInputError('estimatedHours', 'Estimated hours must be greater than 0');
+    throw new PlanningInputError(
+      'estimatedHours',
+      `"${task.title}": estimated hours must be greater than 0`,
+      task.id,
+    );
   }
   if (task.estimatedHours > MAX_TASK_HOURS || !isQuarterHours(task.estimatedHours)) {
     throw new PlanningInputError(
       'estimatedHours',
-      `Estimated hours must be at most ${MAX_TASK_HOURS}, in steps of 0.25`,
+      `"${task.title}": estimated hours must be at most ${MAX_TASK_HOURS}, in steps of 0.25`,
+      task.id,
     );
   }
 }

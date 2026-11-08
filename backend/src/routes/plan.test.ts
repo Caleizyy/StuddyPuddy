@@ -135,4 +135,29 @@ describe('GET /api/plan', () => {
     expect(plan.schedule).toEqual([]);
     expect(plan.feasible).toBe(true);
   });
+
+  it('names the task when a saved task is no longer valid', async () => {
+    const ada = await UserModel.findOne({ email: 'ada@example.com' });
+    // Written straight to the database, the way an older version of the app could have saved it
+    const { insertedId } = await TaskModel.collection.insertOne({
+      userId: ada!._id,
+      title: 'Old thesis',
+      category: 'homework',
+      deadline: new Date('2026-12-01T12:00:00Z'),
+      moduleCount: 1,
+      estimatedHours: 500,
+      status: 'todo',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const response = await getPlan(tokenAda);
+
+    expect(response.status).toBe(422);
+    expect(response.body.error.message).toContain('Old thesis');
+    expect(response.body.error.details[0]).toMatchObject({
+      field: 'estimatedHours',
+      taskId: String(insertedId),
+    });
+  });
 });
