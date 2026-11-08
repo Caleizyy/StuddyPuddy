@@ -10,7 +10,7 @@ Pure planning logic: it scores tasks and builds a study plan. It has no imports 
 - `hoursByWeekday`: 7 numbers of study hours, **Sunday first** (index 0 = Sunday ... 6 = Saturday).
 - `now`: a `Date`. Days are counted as UTC calendar days.
 
-Allowed values: `estimatedHours` from above 0 up to 1000, and every hours value (task or weekday) in steps of 0.25. A weekday has 0 to 24 hours. A deadline must be a valid date.
+Allowed values: `estimatedHours` from above 0 up to 200, and every hours value (task or weekday) in steps of 0.25. A weekday has 0 to 24 hours. A deadline must be a valid date. At most 100 unfinished tasks.
 
 ## Output
 

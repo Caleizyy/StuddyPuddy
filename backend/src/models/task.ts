@@ -15,7 +15,7 @@ const taskSchema = new Schema(
       min: 1,
       validate: { validator: Number.isInteger, message: 'moduleCount must be a whole number' },
     },
-    estimatedHours: { type: Number, required: true, min: 0.25, max: 1000 },
+    estimatedHours: { type: Number, required: true, min: 0.25, max: 200 },
     status: { type: String, enum: TASK_STATUSES, default: 'todo' },
   },
   { timestamps: true },

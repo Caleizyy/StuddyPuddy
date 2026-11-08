@@ -1,7 +1,8 @@
 import { addDays, dateKey } from './dates.js';
 import { assessTask, compareRanked } from './priority.js';
 import type { Plan, PlanItem, PlanTask, PlanWarning, Ranked, ScheduleEntry } from './types.js';
-import { validateAvailability, validateTask } from './validation.js';
+import { MAX_OPEN_TASKS, validateAvailability, validateTask } from './validation.js';
+import { PlanningInputError } from './errors.js';
 
 export type PlanInput = {
   tasks: PlanTask[];
@@ -13,6 +14,12 @@ export function buildPlan({ tasks, hoursByWeekday, now }: PlanInput): Plan {
   validateAvailability(hoursByWeekday);
 
   const openTasks = tasks.filter((task) => task.status !== 'done');
+  if (openTasks.length > MAX_OPEN_TASKS) {
+    throw new PlanningInputError(
+      'tasks',
+      `You can have at most ${MAX_OPEN_TASKS} unfinished tasks`,
+    );
+  }
   for (const task of openTasks) {
     validateTask(task);
   }
