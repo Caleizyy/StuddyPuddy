@@ -1,6 +1,11 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 export type PriorityBand = 'high' | 'medium' | 'low';
 
+// Settings that belong to one client. Every field is optional, so a plan can be built without any.
+export type PlanSettings = {
+  maxHoursPerDay?: number | null; // a personal daily study limit; null or missing means no limit
+};
+
 export type PlanTask = {
   id: string;
   title: string;

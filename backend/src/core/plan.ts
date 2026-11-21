@@ -1,6 +1,15 @@
 import { addDays, dateKey } from './dates.js';
 import { assessTask, compareRanked } from './priority.js';
-import type { Plan, PlanItem, PlanTask, PlanWarning, Ranked, ScheduleEntry } from './types.js';
+import { applyDailyLimit, validateSettings } from './settings.js';
+import type {
+  Plan,
+  PlanItem,
+  PlanSettings,
+  PlanTask,
+  PlanWarning,
+  Ranked,
+  ScheduleEntry,
+} from './types.js';
 import { MAX_OPEN_TASKS, validateAvailability, validateTask } from './validation.js';
 import { PlanningInputError } from './errors.js';
 
@@ -8,10 +17,20 @@ export type PlanInput = {
   tasks: PlanTask[];
   hoursByWeekday: number[]; // index 0 = Sunday
   now: Date;
+  settings?: PlanSettings; // the client's own settings, for example a daily study limit
 };
 
-export function buildPlan({ tasks, hoursByWeekday, now }: PlanInput): Plan {
-  validateAvailability(hoursByWeekday);
+export function buildPlan({
+  tasks,
+  hoursByWeekday: userHours,
+  now,
+  settings = {},
+}: PlanInput): Plan {
+  validateAvailability(userHours);
+  validateSettings(settings);
+
+  // From here on, every rule uses the hours the user can really study on each day
+  const hoursByWeekday = applyDailyLimit(userHours, settings);
 
   const openTasks = tasks.filter((task) => task.status !== 'done');
   if (openTasks.length > MAX_OPEN_TASKS) {

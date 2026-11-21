@@ -4,11 +4,12 @@ Pure planning logic: it scores tasks and builds a study plan. It has no imports 
 
 ## Input
 
-`buildPlan({ tasks, hoursByWeekday, now })`
+`buildPlan({ tasks, hoursByWeekday, now, settings })`
 
 - `tasks`: a list of `{ id, title, deadline: Date, estimatedHours, createdAt: Date, status }`. Status is `todo`, `in_progress` or `done`.
 - `hoursByWeekday`: 7 numbers of study hours, **Sunday first** (index 0 = Sunday ... 6 = Saturday).
 - `now`: a `Date`. Days are counted as UTC calendar days.
+- `settings` (optional): the client's own settings. Today it has one field, `maxHoursPerDay`: a personal daily study limit from 0.25 to 24 hours, or `null` for no limit. Without settings the plan is built exactly as before.
 
 Allowed values: `estimatedHours` from above 0 up to 200, and every hours value (task or weekday) in steps of 0.25. A weekday has 0 to 24 hours. A deadline must be a valid date. At most 100 unfinished tasks.
 
@@ -28,8 +29,8 @@ A plan with four parts:
 - A task due today counts as 1 remaining day. An overdue task, or a task with no study time at all, gets the maximum score.
 - Ties are broken by earlier deadline, then longer task, then earlier creation time.
 - Finished tasks (`done`) are left out of the plan.
-- Hours are handed out to the most urgent task first, on the earliest free days. A day never gets more hours than the user has for that weekday.
+- Hours are handed out to the most urgent task first, on the earliest free days. A day never gets more hours than the user has for that weekday. With a daily limit, each weekday counts as the smaller of its hours and the limit, for the priority scores, the at-risk flags and the schedule alike.
 
 ## Errors
 
-Invalid input throws `PlanningInputError`. Its `field` property names what to fix: `deadline`, `estimatedHours`, `availability` or `tasks` (more than 100 unfinished tasks).
+Invalid input throws `PlanningInputError`. Its `field` property names what to fix: `deadline`, `estimatedHours`, `availability`, `maxHoursPerDay` or `tasks` (more than 100 unfinished tasks).
