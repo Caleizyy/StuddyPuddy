@@ -38,13 +38,13 @@ export async function loginUser(input: LoginInput) {
   }
 
   const token = await signToken(user.id, user.tokenVersion);
-  return { token, user: { id: user.id, name: user.name, email: user.email } };
+  return { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
 }
 
 export async function getCurrentUser(userId: string) {
   const user = await findUserById(userId);
   if (!user) throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
-  return { id: user.id, name: user.name, email: user.email };
+  return { id: user.id, name: user.name, email: user.email, role: user.role };
 }
 
 export async function logoutUser(userId: string) {

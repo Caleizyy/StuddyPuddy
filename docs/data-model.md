@@ -9,6 +9,8 @@ StuddyPuddy stores its data in MongoDB, accessed through Mongoose. There are thr
 - `createdAt`, `updatedAt`: set automatically
 - `passwordHash`: string, bcrypt-hashed
 - `tokenVersion`: whole number, defaults to 0; incremented on logout to invalidate issued tokens
+- `role`: `user` (default) or `admin`. Set only by the seed or by hand in the database, never through the app. It is read from the database on every request, not from the login token.
+- `maxHoursPerDay`: number from 0.25 to 24, or `null` (default) for no limit. The user's own daily study limit, applied by the planning core.
 
 ## tasks
 

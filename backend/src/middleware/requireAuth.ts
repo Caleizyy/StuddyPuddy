@@ -22,5 +22,6 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   }
 
   req.userId = user.id;
+  req.userRole = user.role === 'admin' ? 'admin' : 'user';
   next();
 };

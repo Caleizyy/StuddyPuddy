@@ -4,11 +4,13 @@ import type { PlanTask } from '../core/types.js';
 import { listTasksForUser } from '../repositories/task.repository.js';
 import { AppError } from '../utils/AppError.js';
 import { getHoursByWeekday } from './availability.service.js';
+import { getSettings } from './settings.service.js';
 
 export async function getPlanForUser(userId: string, now: Date) {
-  const [tasks, hoursByWeekday] = await Promise.all([
+  const [tasks, hoursByWeekday, settings] = await Promise.all([
     listTasksForUser(userId),
     getHoursByWeekday(userId),
+    getSettings(userId),
   ]);
 
   // The core works with plain objects, not database records
@@ -22,8 +24,8 @@ export async function getPlanForUser(userId: string, now: Date) {
   }));
 
   try {
-    const plan = buildPlan({ tasks: planTasks, hoursByWeekday, now });
-    return { generatedAt: now, ...plan };
+    const plan = buildPlan({ tasks: planTasks, hoursByWeekday, now, settings });
+    return { generatedAt: now, settings, ...plan };
   } catch (error) {
     // The core says which field is wrong. We turn that into a normal API error.
     if (error instanceof PlanningInputError) {
