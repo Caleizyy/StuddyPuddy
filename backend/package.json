@@ -21,7 +21,8 @@
     "seed": "tsx src/seed/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "verify:correctness": "tsx src/verification/cli.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -105,6 +105,18 @@ The seed deletes all existing users, tasks and availability in the configured da
 6. On the **Tasks** page, mark a task as completed. The plan updates and the finished task disappears from it.
 7. Log in as another user and open **Tasks**. The first user's tasks are not visible.
 
+## Verifying correctness
+
+The main quality attribute is correctness: the plan must follow the rules, and no day may be planned for more hours than the user allows. One command checks it and prints a results table:
+
+```
+npm run verify:correctness -w backend
+```
+
+It checks 10 predefined scenarios (their expected plans were worked out by hand) and 1000 generated inputs from fixed seeds, so every run gives the same result. For each of them it checks eight rules, for example "no day exceeds the daily maximum (the user's hours, lowered by their daily limit)", "no task is studied after its deadline" and "scheduled plus unscheduled hours equal the estimate". The command exits with an error if anything fails. The same checks also run inside `npm test`.
+
+The latest table is saved in `docs/verification-correctness.md`; add `-- --write` to the command to refresh it. The code is in `backend/src/verification/`, and the test file includes tests that feed each rule a deliberately wrong plan to prove the checks can fail.
+
 ## Tests
 
 ```
