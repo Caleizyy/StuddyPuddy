@@ -89,7 +89,8 @@ export function checkWhichTasks(input: PlanCase, plan: Plan): string[] {
   const problems: string[] = [];
   const open = input.tasks.filter((task) => task.status !== 'done').map((task) => task.id);
   const planned = plan.items.map((item) => item.taskId);
-  if ([...open].sort().join() !== [...planned].sort().join()) {
+  const byId = (a: string, b: string) => a.localeCompare(b);
+  if ([...open].sort(byId).join() !== [...planned].sort(byId).join()) {
     problems.push('the planned tasks are not exactly the unfinished tasks');
   }
   return problems;
