@@ -22,3 +22,26 @@ describe('login limit settings', () => {
     await expect(import('./index.js')).rejects.toThrow('PORT');
   });
 });
+
+describe('trust proxy setting', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it('defaults to no proxy', async () => {
+    const { config } = await import('./index.js');
+    expect(config.trustProxyHops).toBe(0);
+  });
+
+  it('reads the number of proxies', async () => {
+    vi.stubEnv('TRUST_PROXY_HOPS', '1');
+    const { config } = await import('./index.js');
+    expect(config.trustProxyHops).toBe(1);
+  });
+
+  it.each(['', '0', 'abc'])('rejects TRUST_PROXY_HOPS=%j', async (value) => {
+    vi.stubEnv('TRUST_PROXY_HOPS', value);
+    await expect(import('./index.js')).rejects.toThrow('TRUST_PROXY_HOPS');
+  });
+});

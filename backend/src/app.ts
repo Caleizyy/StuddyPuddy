@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
   const app = express();
+  if (config.trustProxyHops > 0) app.set('trust proxy', config.trustProxyHops);
   app.use(cors({ origin: config.corsOrigin }));
   app.use(express.json());
   app.use('/api', routes);
