@@ -14,6 +14,9 @@ export type PlanItem = {
   availableHours: number;
   scheduledHours: number;
   unscheduledHours: number;
+  nextStep: string | null; // the first topic of the task that is not done yet
+  stepsDone: number;
+  stepsTotal: number;
 };
 
 export type ScheduleEntry = { date: string; taskId: string; title: string; hours: number };

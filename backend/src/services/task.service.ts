@@ -3,12 +3,20 @@ import {
   deleteTaskForUser,
   findTaskForUser,
   searchTasksForUser,
+  setStepDoneForUser,
+  setStepsForUser,
   countTasksForUser,
   updateTaskForUser,
   type TaskRecord,
 } from '../repositories/task.repository.js';
 import type { TaskQuery } from '../schemas/taskQuery.schema.js';
-import type { CreateTaskInput, UpdateTaskInput } from '../schemas/task.schema.js';
+import { splitIntoSteps } from '../core/steps.js';
+import type {
+  CreateTaskInput,
+  ReplaceStepsInput,
+  StepDoneInput,
+  UpdateTaskInput,
+} from '../schemas/task.schema.js';
 import { AppError } from '../utils/AppError.js';
 import { MAX_OPEN_TASKS } from '../core/validation.js';
 import { countOpenTasksForUser } from '../repositories/task.repository.js';
@@ -22,6 +30,12 @@ function toTaskDto(task: TaskRecord) {
     moduleCount: task.moduleCount,
     estimatedHours: task.estimatedHours,
     status: task.status,
+    steps: (task.steps ?? []).map((step) => ({
+      id: String(step._id),
+      title: step.title,
+      hours: step.hours,
+      done: step.done ?? false,
+    })),
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
   };
@@ -79,4 +93,39 @@ export async function updateTask(userId: string, taskId: string, input: UpdateTa
 export async function deleteTask(userId: string, taskId: string) {
   const task = await deleteTaskForUser(userId, taskId);
   if (!task) throw taskNotFound();
+}
+
+// Makes one step per module with the estimate shared between them. Only for a task without steps,
+// so a person's own topics are never overwritten by accident.
+export async function splitTask(userId: string, taskId: string) {
+  const task = await findTaskForUser(userId, taskId);
+  if (!task) throw taskNotFound();
+  if ((task.steps ?? []).length > 0) {
+    throw new AppError(409, 'STEPS_EXIST', 'This task already has topics');
+  }
+  const drafts = splitIntoSteps(task.estimatedHours, task.moduleCount);
+  const updated = await setStepsForUser(
+    userId,
+    taskId,
+    drafts.map((draft) => ({ ...draft, done: false })),
+  );
+  if (!updated) throw taskNotFound();
+  return toTaskDto(updated);
+}
+
+export async function replaceSteps(userId: string, taskId: string, input: ReplaceStepsInput) {
+  const task = await setStepsForUser(userId, taskId, input.steps);
+  if (!task) throw taskNotFound();
+  return toTaskDto(task);
+}
+
+export async function markStep(
+  userId: string,
+  taskId: string,
+  stepId: string,
+  input: StepDoneInput,
+) {
+  const task = await setStepDoneForUser(userId, taskId, stepId, input.done);
+  if (!task) throw new AppError(404, 'STEP_NOT_FOUND', 'Topic not found');
+  return toTaskDto(task);
 }

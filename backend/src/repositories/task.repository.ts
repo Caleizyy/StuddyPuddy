@@ -110,3 +110,36 @@ export async function searchTasksForUser(
 export async function countTasksForUser(userId: string): Promise<number> {
   return TaskModel.countDocuments({ userId });
 }
+
+export type StepFields = { id?: string; title: string; hours: number; done: boolean };
+
+// Replaces the whole list of steps. A step that comes with an id keeps it, so ticks survive an edit.
+export async function setStepsForUser(
+  userId: string,
+  taskId: string,
+  steps: StepFields[],
+): Promise<TaskRecord | null> {
+  if (!isObjectIdOrHexString(taskId)) return null;
+  const documents = steps.map(({ id, ...rest }) => (id ? { _id: id, ...rest } : rest));
+  return TaskModel.findOneAndUpdate(
+    { _id: taskId, userId },
+    { $set: { steps: documents } },
+    { new: true, runValidators: true },
+  );
+}
+
+// Ticks one step. The filter holds the owner, the task and the step, so a step id that belongs to
+// another task or another person matches nothing.
+export async function setStepDoneForUser(
+  userId: string,
+  taskId: string,
+  stepId: string,
+  done: boolean,
+): Promise<TaskRecord | null> {
+  if (!isObjectIdOrHexString(taskId) || !isObjectIdOrHexString(stepId)) return null;
+  return TaskModel.findOneAndUpdate(
+    { _id: taskId, userId, 'steps._id': stepId },
+    { $set: { 'steps.$.done': done } },
+    { new: true },
+  );
+}

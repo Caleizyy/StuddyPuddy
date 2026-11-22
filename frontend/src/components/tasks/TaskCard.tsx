@@ -1,5 +1,6 @@
 import { BookOpen, Check, Clock, Pencil, RotateCcw, Trash2 } from 'lucide-react';
-import type { Task } from '@/api/tasks';
+import type { Task, TaskStep } from '@/api/tasks';
+import { TaskSteps } from '@/components/tasks/TaskSteps';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { describeDeadline, formatDeadline } from '@/lib/deadline';
@@ -33,10 +34,23 @@ type TaskCardProps = {
   onToggleDone: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onSplit: () => void;
+  onToggleStep: (step: TaskStep) => void;
+  onEditSteps: () => void;
   priority?: PlanItem;
 };
 
-export function TaskCard({ task, busy, onToggleDone, onEdit, onDelete, priority }: TaskCardProps) {
+export function TaskCard({
+  task,
+  busy,
+  onToggleDone,
+  onEdit,
+  onDelete,
+  onSplit,
+  onToggleStep,
+  onEditSteps,
+  priority,
+}: TaskCardProps) {
   const isDone = task.status === 'done';
   const deadline = describeDeadline(task.deadline);
 
@@ -76,6 +90,14 @@ export function TaskCard({ task, busy, onToggleDone, onEdit, onDelete, priority 
           {task.moduleCount} {task.moduleCount === 1 ? 'module' : 'modules'}
         </span>
       </div>
+
+      <TaskSteps
+        task={task}
+        busy={busy}
+        onSplit={onSplit}
+        onToggle={onToggleStep}
+        onEdit={onEditSteps}
+      />
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>

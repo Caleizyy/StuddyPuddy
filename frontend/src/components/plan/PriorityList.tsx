@@ -28,6 +28,14 @@ export function PriorityList({ items }: { items: PlanItem[] }) {
             {describeDeadline(item.deadline).label} · score {formatScore(item.priorityScore)} ·{' '}
             {hoursSummary(item)}
           </p>
+          {item.nextStep && (
+            <p className="mt-1 text-sm">
+              <span className="text-muted-foreground">Next topic:</span> {item.nextStep}{' '}
+              <span className="text-muted-foreground">
+                ({item.stepsDone} of {item.stepsTotal} done)
+              </span>
+            </p>
+          )}
         </li>
       ))}
     </ol>
