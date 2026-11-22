@@ -117,6 +117,16 @@ It checks 10 predefined scenarios (their expected plans were worked out by hand)
 
 The latest table is saved in `docs/verification-correctness.md`; add `-- --write` to the command to refresh it. The code is in `backend/src/verification/`, and the test file includes tests that feed each rule a deliberately wrong plan to prove the checks can fail.
 
+## Verifying security
+
+The second quality attribute is security. One command runs the checks and lists each one by name:
+
+```
+npm run verify:security -w backend
+```
+
+It checks, without needing a database, that every route (found automatically) refuses requests without a login, that forged, expired and logged-out tokens fail, that a normal user is refused the admin page, that unexpected input is refused, that responses and errors leak nothing, that security headers are set, and that password guessing is slowed down. The criteria, expected and actual results, and the known limits are in `docs/verification-security.md`.
+
 ## Tests
 
 ```
