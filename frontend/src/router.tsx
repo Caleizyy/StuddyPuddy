@@ -12,10 +12,12 @@ import { RegisterPage } from '@/pages/RegisterPage';
 import { TasksPage } from './pages/TasksPage';
 import { AvailabilityPage } from './pages/AvailabilityPage';
 import { PlanPage } from './pages/PlanPage';
+import { RouteError } from '@/components/RouteError';
 
 export const router = createBrowserRouter([
   {
     element: <Layout />,
+    errorElement: <RouteError />,
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/login', element: <LoginPage /> },
