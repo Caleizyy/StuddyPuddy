@@ -65,7 +65,8 @@ describe('time entries with a real database', () => {
     expect(second.status).toBe(201);
     expect(second.body.task.loggedHours).toBe(3.5);
 
-    const entryId = second.body.task.timeEntries[0].id as string;
+    const entries = second.body.task.timeEntries as { id: string; note?: string }[];
+    const entryId = entries.find((entry) => entry.note === 'chapter 3')?.id as string;
     const removed = await request(app)
       .delete(`/api/tasks/${adaTaskId}/time/${entryId}`)
       .set(as(tokenAda));
