@@ -12,6 +12,8 @@ const loggedOutLinks: NavItem[] = [
   { to: '/register', label: 'Register' },
 ];
 
+const adminLink: NavItem = { to: '/admin', label: 'Usage' };
+
 const loggedInLinks: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/tasks', label: 'Tasks' },
@@ -43,7 +45,7 @@ function NavItems({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => 
 }
 
 export function Navbar() {
-  const { status, logout, retry } = useAuth();
+  const { user, status, logout, retry } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const isLoggedIn = status === 'authenticated';
@@ -51,7 +53,7 @@ export function Navbar() {
   // While the session is still being checked we show only the logo,
   // so the wrong set of links never flashes on screen
   let items: NavItem[] = [];
-  if (isLoggedIn) items = loggedInLinks;
+  if (isLoggedIn) items = user?.role === 'admin' ? [...loggedInLinks, adminLink] : loggedInLinks;
   if (status === 'anonymous') items = loggedOutLinks;
 
   function closeMenu() {

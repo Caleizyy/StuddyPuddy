@@ -23,6 +23,15 @@ function PlanContent({ plan }: { plan: Plan }) {
 
   return (
     <>
+      {plan.settings.maxHoursPerDay !== null && (
+        <p className="text-sm text-muted-foreground">
+          Your daily limit of {plan.settings.maxHoursPerDay} h is applied.{' '}
+          <Link to="/availability" className="text-primary underline">
+            Change it
+          </Link>
+        </p>
+      )}
+
       <PlanWarnings plan={plan} />
 
       {plan.schedule.length === 0 && (

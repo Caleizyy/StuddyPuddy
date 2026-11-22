@@ -27,6 +27,7 @@ export type PlanWarning = {
 
 export type Plan = {
   generatedAt: string;
+  settings: { maxHoursPerDay: number | null }; // the personal daily limit that shaped this plan
   items: PlanItem[]; // unfinished tasks, highest priority first
   schedule: ScheduleEntry[]; // study hours per day, ordered by date
   warnings: PlanWarning[];
