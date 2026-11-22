@@ -136,7 +136,7 @@ The second quality attribute is security. One command runs the checks and lists 
 npm run verify:security -w backend
 ```
 
-It checks, without needing a database, that every route (found automatically) refuses requests without a login, that forged, expired and logged-out tokens fail, that a normal user is refused the admin page, that unexpected input is refused, that responses and errors leak nothing, that security headers are set, and that password guessing is slowed down. The criteria, expected and actual results, and the known limits are in `docs/verification-security.md`.
+It checks, without needing a database, that every route (found automatically) refuses requests without a login, that forged, expired and logged-out tokens fail, that a normal user is refused the admin page, that unexpected input is refused, that responses and errors leak nothing, that security headers are set, that password guessing, account creation and API use in general are rate limited, that request bodies must be JSON, that answers are never cached, and that easy passwords are refused. The criteria, expected and actual results, and the known limits are in `docs/verification-security.md`.
 
 ## Tests
 

@@ -15,7 +15,14 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (isServerError) console.error(err);
 
   // Your own errors keep their code. Other 4xx errors (for example bad JSON) are the client's fault.
-  const code = known ? err.code : isServerError ? 'INTERNAL_ERROR' : 'BAD_REQUEST';
+  const tooLarge = err.type === 'entity.too.large';
+  const code = known
+    ? err.code
+    : isServerError
+      ? 'INTERNAL_ERROR'
+      : tooLarge
+        ? 'PAYLOAD_TOO_LARGE'
+        : 'BAD_REQUEST';
 
   res.status(status).json({
     error: {
