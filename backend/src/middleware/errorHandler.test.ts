@@ -45,6 +45,7 @@ describe('error handler', () => {
   it('masks the message of our own 5xx errors in production', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('BCRYPT_ROUNDS', '12'); // production needs at least 10, the test default is 4
     vi.resetModules();
     const { errorHandler: productionHandler } = await import('./errorHandler.js');
     const { AppError: ProductionAppError } = await import('../utils/AppError.js');
