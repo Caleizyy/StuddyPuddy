@@ -1,16 +1,27 @@
 import { useEffect, useState } from 'react';
 import { getAvailability, type WeeklyHours } from '@/api/availability';
+import { getSettings } from '@/api/settings';
 import { AvailabilityForm } from '@/components/availability/AvailabilityForm';
+import { DailyLimitForm } from '@/components/availability/DailyLimitForm';
 
 type LoadState =
-  { status: 'loading' } | { status: 'error' } | { status: 'ready'; hours: WeeklyHours };
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; hours: WeeklyHours; maxHoursPerDay: number | null };
 
 export function AvailabilityPage() {
   const [state, setState] = useState<LoadState>({ status: 'loading' });
 
   useEffect(() => {
-    getAvailability()
-      .then((result) => setState({ status: 'ready', hours: result.hoursByWeekday }))
+    // Both come from the server; the page shows once both have arrived
+    Promise.all([getAvailability(), getSettings()])
+      .then(([availability, settings]) =>
+        setState({
+          status: 'ready',
+          hours: availability.hoursByWeekday,
+          maxHoursPerDay: settings.settings.maxHoursPerDay,
+        }),
+      )
       .catch(() => setState({ status: 'error' }));
   }, []);
 
@@ -30,7 +41,12 @@ export function AvailabilityPage() {
           Could not load your availability. Reload the page to try again.
         </p>
       )}
-      {state.status === 'ready' && <AvailabilityForm initial={state.hours} />}
+      {state.status === 'ready' && (
+        <>
+          <AvailabilityForm initial={state.hours} />
+          <DailyLimitForm initial={state.maxHoursPerDay} />
+        </>
+      )}
     </main>
   );
 }

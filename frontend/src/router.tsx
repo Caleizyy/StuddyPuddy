@@ -1,6 +1,8 @@
 import { createBrowserRouter } from 'react-router';
 import { Layout } from '@/components/layout/Layout';
+import { AdminRoute } from '@/components/AdminRoute';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { AdminPage } from '@/pages/AdminPage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { HomePage } from '@/pages/HomePage';
@@ -26,6 +28,10 @@ export const router = createBrowserRouter([
           { path: '/plan', element: <PlanPage /> },
           { path: '/profile', element: <ComingSoonPage title="Profile" /> },
           { path: '/availability', element: <AvailabilityPage /> },
+          {
+            element: <AdminRoute />,
+            children: [{ path: '/admin', element: <AdminPage /> }],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

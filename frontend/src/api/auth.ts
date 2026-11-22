@@ -2,7 +2,8 @@ import { api } from './client';
 
 export type RegisterRequest = { name: string; email: string; password: string };
 export type RegisteredUser = { id: string; name: string; email: string; createdAt: string };
-export type AuthUser = { id: string; name: string; email: string };
+export type UserRole = 'user' | 'admin';
+export type AuthUser = { id: string; name: string; email: string; role: UserRole };
 export type LoginRequest = { email: string; password: string };
 
 export const registerUser = (data: RegisterRequest) =>
