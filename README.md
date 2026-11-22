@@ -58,6 +58,30 @@ npm run dev
 
 The backend runs on http://localhost:3000 and the app on http://localhost:5173. Stop both with Ctrl+C.
 
+## Run with Docker
+
+The whole system (MongoDB, the API and the web app) starts with one command. You need Docker Desktop and nothing else:
+
+```
+docker compose up --build
+```
+
+Open http://localhost:8080. The first start takes a few minutes while the images build.
+
+All settings come from environment variables. `docker-compose.yml` has demo defaults, so the command works on a fresh checkout. To use your own values (a real `JWT_SECRET`, a MongoDB Atlas connection string, another port), copy `.env.example` to `.env` and fill it in; nothing else needs editing.
+
+To fill the database with sample users (this wipes it first):
+
+```
+SEED_PASSWORD=choose-a-password docker compose --profile tools run --rm seed
+```
+
+On Windows PowerShell set the variable first with `$env:SEED_PASSWORD="choose-a-password"`.
+
+Stop with Ctrl+C. `docker compose down` removes the containers and keeps the data; add `-v` to delete the data too.
+
+The server keeps no state of its own between requests (the login token carries the identity and everything else is in MongoDB). That is why more than one copy of the API can run at once: `docker compose up --build --scale backend=2`.
+
 ## Sample data
 
 ```

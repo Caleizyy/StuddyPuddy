@@ -30,6 +30,9 @@ export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: positiveIntFromEnv('PORT', 3000),
   mongoUri: required('MONGODB_URI'),
+  // How many reverse proxies (for example nginx) sit in front of the API. 0 means none.
+  // With 1, the real client address comes from the proxy's X-Forwarded-For header.
+  trustProxyHops: positiveIntFromEnv('TRUST_PROXY_HOPS', 0),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   bcryptRounds,
   seedPassword: process.env.SEED_PASSWORD, // only used by `npm run seed`

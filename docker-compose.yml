@@ -1,0 +1,77 @@
+# Starts the whole system: MongoDB, the API and the web app.
+#
+#   docker compose up --build
+#
+# Then open http://localhost:8080
+#
+# Every setting comes from an environment variable. The values after ":-" are demo
+# defaults so the command works on a fresh checkout. For a real deployment put your own
+# values in a .env file next to this one (see .env.example); nothing else needs editing.
+
+services:
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/studdypuddy}
+      JWT_SECRET: ${JWT_SECRET:-demo-only-secret-change-me-before-real-use-0123456789}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      # nginx sits in front of the API, so trust one proxy for the real client address
+      TRUST_PROXY_HOPS: 1
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/api/health']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Fills the database with demo users and tasks. It wipes the database first, so it
+  # only runs when asked for:
+  #   SEED_PASSWORD=choose-one docker compose --profile tools run --rm seed
+  seed:
+    profiles: ['tools']
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      # The seed refuses to run when NODE_ENV is "production", on purpose. Only this one
+      # container is told it is a development run, and only because you asked for it.
+      NODE_ENV: development
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/studdypuddy}
+      JWT_SECRET: ${JWT_SECRET:-demo-only-secret-change-me-before-real-use-0123456789}
+      SEED_PASSWORD: ${SEED_PASSWORD:-}
+      ALLOW_SEED_WIPE: 'true'
+    command: ['node', 'dist/seed/seed.js']
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
