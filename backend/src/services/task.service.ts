@@ -5,14 +5,18 @@ import {
   searchTasksForUser,
   setStepDoneForUser,
   setStepsForUser,
+  addTimeEntryForUser,
+  removeTimeEntryForUser,
   countTasksForUser,
   updateTaskForUser,
   type TaskRecord,
 } from '../repositories/task.repository.js';
 import type { TaskQuery } from '../schemas/taskQuery.schema.js';
 import { splitIntoSteps } from '../core/steps.js';
+import { MAX_TIME_ENTRIES } from '../models/task.js';
 import type {
   CreateTaskInput,
+  LogTimeInput,
   ReplaceStepsInput,
   StepDoneInput,
   UpdateTaskInput,
@@ -20,6 +24,11 @@ import type {
 import { AppError } from '../utils/AppError.js';
 import { MAX_OPEN_TASKS } from '../core/validation.js';
 import { countOpenTasksForUser } from '../repositories/task.repository.js';
+
+// Quarter hours add up exactly in floating point, so this sum is exact
+export function loggedHoursOf(task: { timeEntries?: { hours: number }[] | null }): number {
+  return (task.timeEntries ?? []).reduce((sum, entry) => sum + entry.hours, 0);
+}
 
 function toTaskDto(task: TaskRecord) {
   return {
@@ -36,6 +45,15 @@ function toTaskDto(task: TaskRecord) {
       hours: step.hours,
       done: step.done ?? false,
     })),
+    loggedHours: loggedHoursOf(task),
+    timeEntries: [...(task.timeEntries ?? [])]
+      .map((entry) => ({
+        id: String(entry._id),
+        date: entry.date,
+        hours: entry.hours,
+        note: entry.note ?? null,
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date)),
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
   };
@@ -127,5 +145,35 @@ export async function markStep(
 ) {
   const task = await setStepDoneForUser(userId, taskId, stepId, input.done);
   if (!task) throw new AppError(404, 'STEP_NOT_FOUND', 'Topic not found');
+  return toTaskDto(task);
+}
+
+function timeLogFull() {
+  return new AppError(
+    409,
+    'TIME_LOG_FULL',
+    `A task can have at most ${MAX_TIME_ENTRIES} time entries`,
+  );
+}
+
+export async function logTime(userId: string, taskId: string, input: LogTimeInput) {
+  const current = await findTaskForUser(userId, taskId);
+  if (!current) throw taskNotFound();
+  if ((current.timeEntries ?? []).length >= MAX_TIME_ENTRIES) {
+    throw timeLogFull();
+  }
+  const task = await addTimeEntryForUser(userId, taskId, {
+    date: input.date ?? new Date().toISOString().slice(0, 10),
+    hours: input.hours,
+    ...(input.note && { note: input.note }),
+  });
+  // The task was just found, so no match means two requests filled the last place at once
+  if (!task) throw timeLogFull();
+  return toTaskDto(task);
+}
+
+export async function removeTime(userId: string, taskId: string, entryId: string) {
+  const task = await removeTimeEntryForUser(userId, taskId, entryId);
+  if (!task) throw new AppError(404, 'TIME_ENTRY_NOT_FOUND', 'Time entry not found');
   return toTaskDto(task);
 }

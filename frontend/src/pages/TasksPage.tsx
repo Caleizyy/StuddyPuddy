@@ -11,6 +11,7 @@ import {
   type Task,
   type TaskStep,
 } from '@/api/tasks';
+import { LogTimeDialog } from '@/components/tasks/LogTimeDialog';
 import { TopicsDialog } from '@/components/tasks/TopicsDialog';
 import { DeleteTaskDialog } from '@/components/tasks/DeleteTaskDialog';
 import { TaskCard } from '@/components/tasks/TaskCard';
@@ -21,6 +22,7 @@ import { ErrorState } from '@/components/states/ErrorState';
 import { LoadingState } from '@/components/states/LoadingState';
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
+import { remainingOf } from '@/lib/timeLog';
 import {
   DEFAULT_FILTERS,
   filtersFromParams,
@@ -55,6 +57,7 @@ export function TasksPage() {
   const [editor, setEditor] = useState<{ task?: Task } | null>(null);
   const [deleting, setDeleting] = useState<Task | null>(null);
   const [topicsFor, setTopicsFor] = useState<Task | null>(null);
+  const [loggingFor, setLoggingFor] = useState<Task | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const { state: planState, reload: reloadPlan } = usePlan();
@@ -163,7 +166,7 @@ export function TasksPage() {
   }
 
   const openTasks = tasks.filter((task) => task.status !== 'done');
-  const hoursLeft = openTasks.reduce((sum, task) => sum + task.estimatedHours, 0);
+  const hoursLeft = openTasks.reduce((sum, task) => sum + remainingOf(task), 0);
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-8">
@@ -232,6 +235,7 @@ export function TasksPage() {
               onToggleDone={() => void handleToggleDone(task)}
               onEdit={() => setEditor({ task })}
               onDelete={() => setDeleting(task)}
+              onLogTime={() => setLoggingFor(task)}
               onSplit={() =>
                 void runOnTask(
                   task,
@@ -254,6 +258,16 @@ export function TasksPage() {
 
       {editor && (
         <TaskDialog task={editor.task} onClose={() => setEditor(null)} onSaved={handleSaved} />
+      )}
+      {loggingFor && (
+        <LogTimeDialog
+          task={loggingFor}
+          onClose={() => setLoggingFor(null)}
+          onChanged={() => {
+            loadTasks(true);
+            reloadPlan();
+          }}
+        />
       )}
       {topicsFor && (
         <TopicsDialog

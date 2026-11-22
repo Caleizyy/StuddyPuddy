@@ -18,6 +18,7 @@ function task(
   daysLeft: number,
   estimatedHours: number,
   status: PlanTask['status'] = 'todo',
+  loggedHours = 0,
 ): PlanTask {
   counter += 1;
   return {
@@ -25,6 +26,7 @@ function task(
     title,
     deadline: addDays(NOW, daysLeft),
     estimatedHours,
+    ...(loggedHours > 0 && { loggedHours }),
     createdAt: new Date(Date.UTC(2026, 10, 1, 0, counter)),
     status,
   };
@@ -213,6 +215,69 @@ export function buildScenarios(): Scenario[] {
         unscheduled: {},
         feasible: true,
       },
+    },
+    {
+      id: 'S11',
+      name: '6 h task with 4 h already logged',
+      rule: 'Only the hours not yet studied are scheduled',
+      input: {
+        tasks: [task('Essay', 2, 6, 'in_progress', 4)],
+        hoursByWeekday: everyDay(4),
+        now: NOW,
+      },
+      expected: {
+        order: ['Essay'],
+        schedule: [['2026-11-09', 'Essay', 2]],
+        unscheduled: {},
+        feasible: true,
+      },
+    },
+    {
+      id: 'S12',
+      name: 'Logged time lets a task that did not fit fit',
+      rule: 'S9 with 2 h logged: 4 h are left and the limit of 2 h a day is enough',
+      input: {
+        tasks: [task('Essay', 2, 6, 'in_progress', 2)],
+        hoursByWeekday: everyDay(4),
+        now: NOW,
+        settings: { maxHoursPerDay: 2 },
+      },
+      expected: {
+        order: ['Essay'],
+        schedule: [
+          ['2026-11-09', 'Essay', 2],
+          ['2026-11-10', 'Essay', 2],
+        ],
+        unscheduled: {},
+        feasible: true,
+      },
+    },
+    {
+      id: 'S13',
+      name: 'More time logged than estimated',
+      rule: 'Nothing is left to schedule, nothing is urgent, and no warning is raised',
+      input: {
+        tasks: [task('Done in practice', 3, 2, 'in_progress', 3), task('Other', 3, 2)],
+        hoursByWeekday: everyDay(2),
+        now: NOW,
+      },
+      expected: {
+        order: ['Other', 'Done in practice'],
+        schedule: [['2026-11-09', 'Other', 2]],
+        unscheduled: {},
+        feasible: true,
+      },
+    },
+    {
+      id: 'S14',
+      name: 'Everything logged on an overdue task',
+      rule: 'An overdue task with nothing left is not reported as late',
+      input: {
+        tasks: [task('Finished late', -2, 2, 'in_progress', 2)],
+        hoursByWeekday: everyDay(2),
+        now: NOW,
+      },
+      expected: { order: ['Finished late'], schedule: [], unscheduled: {}, feasible: true },
     },
   ];
 }

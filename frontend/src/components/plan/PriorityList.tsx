@@ -5,8 +5,10 @@ import { describeDeadline } from '@/lib/deadline';
 import { formatScore } from '@/lib/priority';
 
 function hoursSummary(item: PlanItem): string {
-  if (item.unscheduledHours === 0) return `${item.scheduledHours} h planned`;
-  return `${item.scheduledHours} h planned, ${item.unscheduledHours} h do not fit`;
+  const logged = item.loggedHours > 0 ? `${item.loggedHours} h studied, ` : '';
+  if (item.remainingHours === 0) return `${logged}nothing left to plan`;
+  if (item.unscheduledHours === 0) return `${logged}${item.scheduledHours} h planned`;
+  return `${logged}${item.scheduledHours} h planned, ${item.unscheduledHours} h do not fit`;
 }
 
 export function PriorityList({ items }: { items: PlanItem[] }) {

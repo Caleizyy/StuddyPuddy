@@ -10,6 +10,15 @@ const stepSchema = new Schema({
   done: { type: Boolean, default: false },
 });
 
+// Time studied for the task. The date is the calendar day it was studied, as text (2026-11-22),
+// so it never shifts with a time zone.
+export const MAX_TIME_ENTRIES = 500;
+const timeEntrySchema = new Schema({
+  date: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
+  hours: { type: Number, required: true, min: 0.25, max: 24 },
+  note: { type: String, trim: true, maxlength: 120 },
+});
+
 const taskSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -25,6 +34,7 @@ const taskSchema = new Schema(
     estimatedHours: { type: Number, required: true, min: 0.25, max: 200 },
     status: { type: String, enum: TASK_STATUSES, default: 'todo' },
     steps: { type: [stepSchema], default: [] },
+    timeEntries: { type: [timeEntrySchema], default: [] },
   },
   { timestamps: true },
 );

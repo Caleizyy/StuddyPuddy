@@ -1,6 +1,6 @@
 import { isObjectIdOrHexString, type HydratedDocument } from 'mongoose';
 import type { QueryFilter } from 'mongoose';
-import { TaskModel, type Task } from '../models/task.js';
+import { MAX_TIME_ENTRIES, TaskModel, type Task } from '../models/task.js';
 import type { TaskQuery } from '../schemas/taskQuery.schema.js';
 
 export type TaskRecord = HydratedDocument<Task>;
@@ -140,6 +140,35 @@ export async function setStepDoneForUser(
   return TaskModel.findOneAndUpdate(
     { _id: taskId, userId, 'steps._id': stepId },
     { $set: { 'steps.$.done': done } },
+    { new: true },
+  );
+}
+
+export type TimeEntryFields = { date: string; hours: number; note?: string };
+
+// Adds one entry. The filter holds the owner and stops at the limit, so a full task matches nothing.
+export async function addTimeEntryForUser(
+  userId: string,
+  taskId: string,
+  entry: TimeEntryFields,
+): Promise<TaskRecord | null> {
+  if (!isObjectIdOrHexString(taskId)) return null;
+  return TaskModel.findOneAndUpdate(
+    { _id: taskId, userId, [`timeEntries.${MAX_TIME_ENTRIES - 1}`]: { $exists: false } },
+    { $push: { timeEntries: entry } },
+    { new: true, runValidators: true },
+  );
+}
+
+export async function removeTimeEntryForUser(
+  userId: string,
+  taskId: string,
+  entryId: string,
+): Promise<TaskRecord | null> {
+  if (!isObjectIdOrHexString(taskId) || !isObjectIdOrHexString(entryId)) return null;
+  return TaskModel.findOneAndUpdate(
+    { _id: taskId, userId, 'timeEntries._id': entryId },
+    { $pull: { timeEntries: { _id: entryId } } },
     { new: true },
   );
 }

@@ -10,7 +10,12 @@ import type {
   Ranked,
   ScheduleEntry,
 } from './types.js';
-import { MAX_OPEN_TASKS, validateAvailability, validateTask } from './validation.js';
+import {
+  MAX_OPEN_TASKS,
+  remainingHours,
+  validateAvailability,
+  validateTask,
+} from './validation.js';
 import { PlanningInputError } from './errors.js';
 
 export type PlanInput = {
@@ -57,7 +62,8 @@ export function buildPlan({
   const warnings: PlanWarning[] = [];
 
   for (const { task, assessment } of ranked) {
-    let hoursLeft = task.estimatedHours;
+    const toSchedule = remainingHours(task);
+    let hoursLeft = toSchedule;
 
     if (assessment.availableHours > 0) {
       for (let day = firstFreeDay; day < assessment.remainingDays; day++) {
@@ -95,8 +101,10 @@ export function buildPlan({
       overdue: assessment.overdue,
       remainingDays: assessment.remainingDays,
       availableHours: assessment.availableHours,
-      scheduledHours: task.estimatedHours - hoursLeft,
+      scheduledHours: toSchedule - hoursLeft,
       unscheduledHours: hoursLeft,
+      loggedHours: task.loggedHours ?? 0,
+      remainingHours: toSchedule,
     });
 
     if (hoursLeft > 0) {

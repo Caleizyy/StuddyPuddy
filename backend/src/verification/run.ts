@@ -65,6 +65,34 @@ export function problemsInCase(input: PlanCase): string[] {
   if (JSON.stringify(runPlan(input)) !== JSON.stringify(plan)) {
     problems.push('R8: the same input gave a different plan the second time');
   }
+  problems.push(...loggingProblems(input, plan));
+  return problems;
+}
+
+// R9: logging a quarter hour on a task never makes it more urgent, takes exactly a quarter hour
+// off what is left, and changes nothing about the other fields of its own summary
+function loggingProblems(input: PlanCase, plan: Plan): string[] {
+  const target = plan.items.find((item) => item.remainingHours > 0);
+  if (!target) return [];
+  const more = {
+    ...input,
+    tasks: input.tasks.map((task) =>
+      task.id === target.taskId ? { ...task, loggedHours: (task.loggedHours ?? 0) + 0.25 } : task,
+    ),
+  };
+  const after = runPlan(more).items.find((item) => item.taskId === target.taskId);
+  if (!after) return ['R9: the task disappeared after logging time'];
+
+  const problems: string[] = [];
+  if (after.priorityScore > target.priorityScore) {
+    problems.push(`R9: ${target.title}: logging time made it more urgent`);
+  }
+  if (after.remainingHours !== target.remainingHours - 0.25) {
+    problems.push(`R9: ${target.title}: a quarter hour logged did not take a quarter hour off`);
+  }
+  if (after.loggedHours !== target.loggedHours + 0.25) {
+    problems.push(`R9: ${target.title}: the logged hours did not go up by a quarter hour`);
+  }
   return problems;
 }
 
@@ -103,6 +131,10 @@ export function runCorrectnessChecks(): ResultRow[] {
   const rules = [
     ...CHECKS.map((check) => ({ id: check.id, name: check.name })),
     { id: 'R8', name: 'The same input always gives the same plan, and the input is not changed' },
+    {
+      id: 'R9',
+      name: 'Logging time never makes a task more urgent and takes exactly that time off',
+    },
   ];
   rules.forEach((rule, index) => {
     const violations = all.filter((problem) => problem.includes(`${rule.id}:`));

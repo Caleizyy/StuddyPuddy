@@ -4,6 +4,8 @@ import {
   deleteTask,
   getTask,
   listTasks,
+  logTime,
+  removeTime,
   markStep,
   replaceSteps,
   splitTask,
@@ -48,4 +50,13 @@ export async function putSteps(req: Request, res: Response) {
 export async function patchStep(req: Request, res: Response) {
   const stepId = Array.isArray(req.params.stepId) ? req.params.stepId[0] : req.params.stepId;
   res.json({ task: await markStep(req.userId!, taskIdFrom(req), stepId, req.body) });
+}
+
+export async function addTime(req: Request, res: Response) {
+  res.status(201).json({ task: await logTime(req.userId!, taskIdFrom(req), req.body) });
+}
+
+export async function deleteTime(req: Request, res: Response) {
+  const entryId = Array.isArray(req.params.entryId) ? req.params.entryId[0] : req.params.entryId;
+  res.json({ task: await removeTime(req.userId!, taskIdFrom(req), entryId) });
 }

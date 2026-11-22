@@ -3,6 +3,7 @@ import { buildPlan } from '../core/plan.js';
 import type { PlanTask } from '../core/types.js';
 import { listTasksForUser } from '../repositories/task.repository.js';
 import { AppError } from '../utils/AppError.js';
+import { loggedHoursOf } from './task.service.js';
 import { getHoursByWeekday } from './availability.service.js';
 import { getSettings } from './settings.service.js';
 
@@ -19,6 +20,7 @@ export async function getPlanForUser(userId: string, now: Date) {
     title: task.title,
     deadline: task.deadline,
     estimatedHours: task.estimatedHours,
+    loggedHours: loggedHoursOf(task),
     createdAt: task.createdAt,
     status: task.status ?? 'todo',
   }));

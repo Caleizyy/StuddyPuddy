@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
+  addTime,
   create,
+  deleteTime,
   getOne,
   list,
   patchStep,
@@ -14,6 +16,7 @@ import { validate, validateQuery } from '../middleware/validate.js';
 import { taskQuerySchema } from '../schemas/taskQuery.schema.js';
 import {
   createTaskSchema,
+  logTimeSchema,
   replaceStepsSchema,
   stepDoneSchema,
   updateTaskSchema,
@@ -31,6 +34,8 @@ router.delete('/tasks/:id', remove);
 
 router.post('/tasks/:id/steps/split', split);
 router.put('/tasks/:id/steps', validate(replaceStepsSchema), putSteps);
+router.post('/tasks/:id/time', validate(logTimeSchema), addTime);
+router.delete('/tasks/:id/time/:entryId', deleteTime);
 router.patch('/tasks/:id/steps/:stepId', validate(stepDoneSchema), patchStep);
 
 export default router;
