@@ -24,7 +24,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "verify:correctness": "tsx src/verification/cli.ts",
-    "verify:security": "vitest run src/security --reporter=verbose"
+    "verify:security": "vitest run src/security --reporter=verbose",
+    "create-admin": "tsx src/seed/createAdmin.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
