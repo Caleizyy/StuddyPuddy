@@ -49,6 +49,10 @@ export async function countOpenTasksForUser(userId: string): Promise<number> {
   return TaskModel.countDocuments({ userId, status: { $ne: 'done' } });
 }
 
+export async function countDoneTasksForUser(userId: string): Promise<number> {
+  return TaskModel.countDocuments({ userId, status: 'done' });
+}
+
 // The two functions below count tasks across all users. They return numbers only, never records,
 // and exist for the admin usage summary. Every function that returns tasks stays scoped by user.
 export async function countAllOpenTasks(): Promise<number> {

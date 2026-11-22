@@ -16,6 +16,7 @@ vi.mock('../repositories/user.repository.js', async (importOriginal) => {
     ...actual,
     findUserByEmailWithHash: vi.fn(),
     findUserById: vi.fn(),
+    findUserWithAvatar: vi.fn(),
     bumpTokenVersion: vi.fn(),
     createUser: vi.fn(),
   };
@@ -52,6 +53,8 @@ beforeEach(() => {
   vi.resetAllMocks();
   users = [];
   vi.mocked(userRepository.findUserById).mockImplementation(((id: string) =>
+    Promise.resolve(users.find((user) => user.id === id) ?? null)) as never);
+  vi.mocked(userRepository.findUserWithAvatar).mockImplementation(((id: string) =>
     Promise.resolve(users.find((user) => user.id === id) ?? null)) as never);
   vi.mocked(userRepository.findUserByEmailWithHash).mockImplementation(((email: string) =>
     Promise.resolve(users.find((user) => user.email === email) ?? null)) as never);

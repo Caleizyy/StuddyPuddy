@@ -22,7 +22,8 @@ export function setAuthToken(token: string | null) {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
   const tokenUsed = authToken;
-  if (options.body) headers.set('Content-Type', 'application/json');
+  // JSON unless the caller already chose a type (a picture upload sends its own)
+  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
 
   let response: Response;
@@ -59,6 +60,8 @@ export const api = {
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
   put: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+  putFile: <T>(path: string, file: Blob) =>
+    request<T>(path, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),

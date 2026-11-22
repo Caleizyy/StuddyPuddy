@@ -5,11 +5,31 @@ import {
   DuplicateEmailError,
   findUserByEmailWithHash,
   bumpTokenVersion,
-  findUserById,
+  findUserWithAvatar,
 } from '../repositories/user.repository.js';
 import type { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 import { AppError } from '../utils/AppError.js';
+import { toDataUrl } from '../utils/image.js';
 import { signToken } from '../utils/token.js';
+
+// What the app needs to know about the signed-in person
+function toAuthUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  role?: string | null;
+  username?: string | null;
+  avatar?: { data: Buffer; contentType: string } | null;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    username: user.username ?? null,
+    avatar: toDataUrl(user.avatar),
+  };
+}
 
 export async function registerUser(input: RegisterInput) {
   const passwordHash = await bcrypt.hash(input.password, config.bcryptRounds);
@@ -38,13 +58,13 @@ export async function loginUser(input: LoginInput) {
   }
 
   const token = await signToken(user.id, user.tokenVersion);
-  return { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+  return { token, user: toAuthUser(user) };
 }
 
 export async function getCurrentUser(userId: string) {
-  const user = await findUserById(userId);
+  const user = await findUserWithAvatar(userId);
   if (!user) throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return toAuthUser(user);
 }
 
 export async function logoutUser(userId: string) {

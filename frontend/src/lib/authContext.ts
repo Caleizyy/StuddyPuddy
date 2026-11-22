@@ -9,6 +9,8 @@ export type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   retry: () => void;
+  // Lets a page that changed the profile update what the navbar shows
+  updateUser: (changes: Partial<AuthUser>) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

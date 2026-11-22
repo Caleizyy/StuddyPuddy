@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { AdminRoute } from '@/components/AdminRoute';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminPage } from '@/pages/AdminPage';
-import { ComingSoonPage } from '@/pages/ComingSoonPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/tasks', element: <TasksPage /> },
           { path: '/plan', element: <PlanPage /> },
-          { path: '/profile', element: <ComingSoonPage title="Profile" /> },
+          { path: '/profile', element: <ProfilePage /> },
           { path: '/availability', element: <AvailabilityPage /> },
           {
             element: <AdminRoute />,
