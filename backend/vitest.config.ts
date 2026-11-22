@@ -7,6 +7,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: {
       NODE_ENV: 'test',
+      BCRYPT_ROUNDS: '4', // the lowest cost allowed in tests, so login tests stay fast on slow CI machines
       JWT_SECRET: 'test-only-secret-that-is-at-least-32-characters-long',
       JWT_EXPIRES_IN: '7d',
       CORS_ORIGIN: 'http://localhost:5173',
