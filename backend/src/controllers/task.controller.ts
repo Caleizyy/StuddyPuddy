@@ -14,7 +14,7 @@ function taskIdFrom(req: Request): string {
 }
 
 export async function list(req: Request, res: Response) {
-  res.json({ tasks: await listTasks(req.userId!) });
+  res.json(await listTasks(req.userId!, res.locals.query));
 }
 
 export async function getOne(req: Request, res: Response) {

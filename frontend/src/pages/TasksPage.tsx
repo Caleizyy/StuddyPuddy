@@ -1,16 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListTodo, Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { ListTodo, Plus, SearchX } from 'lucide-react';
 import type { PlanItem } from '@/api/plan';
 import { ApiError } from '@/api/client';
 import { listTasks, updateTask, type Task } from '@/api/tasks';
 import { DeleteTaskDialog } from '@/components/tasks/DeleteTaskDialog';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDialog } from '@/components/tasks/TaskDialog';
+import { TaskFilterBar } from '@/components/tasks/TaskFilterBar';
 import { EmptyState } from '@/components/states/EmptyState';
 import { ErrorState } from '@/components/states/ErrorState';
 import { LoadingState } from '@/components/states/LoadingState';
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
+import {
+  DEFAULT_FILTERS,
+  filtersFromParams,
+  filtersToParams,
+  hasActiveFilters,
+  toApiQuery,
+  type TaskFilters,
+} from '@/lib/taskFilters';
 
 type LoadState = 'loading' | 'ready' | 'error';
 type PlanInfo = Map<string, { item: PlanItem; rank: number }>;
@@ -29,13 +39,9 @@ function compareTasks(a: Task, b: Task, planInfo: PlanInfo) {
   return a.deadline.localeCompare(b.deadline);
 }
 
-// Replaces the task with the same id, or adds it when it is new
-function upsert(list: Task[], task: Task): Task[] {
-  return [...list.filter((item) => item.id !== task.id), task];
-}
-
 export function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [total, setTotal] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   // null: closed. {}: add a task. { task }: edit that task.
   const [editor, setEditor] = useState<{ task?: Task } | null>(null);
@@ -44,20 +50,44 @@ export function TasksPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const { state: planState, reload: reloadPlan } = usePlan();
 
-  const loadTasks = useCallback(() => {
-    setLoadState('loading');
-    listTasks()
-      .then((result) => {
-        // Keep any task that was created while the list was still loading
-        setTasks((current) => {
-          const loadedIds = new Set(result.tasks.map((task) => task.id));
-          const createdMeanwhile = current.filter((task) => !loadedIds.has(task.id));
-          return [...result.tasks, ...createdMeanwhile];
+  // The filters live in the address, so a filtered list can be bookmarked and Back works
+  const [params, setParams] = useSearchParams();
+  const paramText = params.toString();
+  const filters = useMemo(() => filtersFromParams(new URLSearchParams(paramText)), [paramText]);
+  const filtered = hasActiveFilters(filters);
+
+  const changeFilters = useCallback(
+    (changes: Partial<TaskFilters>) => {
+      setParams((current) => filtersToParams({ ...filtersFromParams(current), ...changes }), {
+        replace: true,
+      });
+    },
+    [setParams],
+  );
+  const clearFilters = useCallback(
+    () => changeFilters({ ...DEFAULT_FILTERS, sort: filters.sort }),
+    [changeFilters, filters.sort],
+  );
+
+  // Only the newest request may update the list, so a slow old answer cannot overwrite a newer one
+  const latestRequest = useRef(0);
+  const loadTasks = useCallback(
+    (quiet = false) => {
+      const request = ++latestRequest.current;
+      if (!quiet) setLoadState('loading');
+      listTasks(toApiQuery(filters))
+        .then((result) => {
+          if (request !== latestRequest.current) return;
+          setTasks(result.tasks);
+          setTotal(result.total);
+          setLoadState('ready');
+        })
+        .catch(() => {
+          if (request === latestRequest.current) setLoadState('error');
         });
-        setLoadState('ready');
-      })
-      .catch(() => setLoadState('error'));
-  }, []);
+    },
+    [filters],
+  );
 
   useEffect(() => {
     loadTasks();
@@ -72,20 +102,23 @@ export function TasksPage() {
     return info;
   }, [planState]);
 
+  // "Most urgent first" follows the plan; every other sort is the order the server gave
   const sortedTasks = useMemo(
-    () => [...tasks].sort((a, b) => compareTasks(a, b, planInfo)),
-    [tasks, planInfo],
+    () =>
+      filters.sort === 'priority' ? [...tasks].sort((a, b) => compareTasks(a, b, planInfo)) : tasks,
+    [tasks, planInfo, filters.sort],
   );
 
-  function handleSaved(task: Task) {
-    setTasks((current) => upsert(current, task));
+  // After any change the list is fetched again, so it always matches the filters
+  function handleSaved() {
     setEditor(null);
+    loadTasks(true);
     reloadPlan();
   }
 
-  function handleDeleted(taskId: string) {
-    setTasks((current) => current.filter((task) => task.id !== taskId));
+  function handleDeleted() {
     setDeleting(null);
+    loadTasks(true);
     reloadPlan();
   }
 
@@ -93,10 +126,8 @@ export function TasksPage() {
     setBusyId(task.id);
     setActionError(null);
     try {
-      const result = await updateTask(task.id, {
-        status: task.status === 'done' ? 'todo' : 'done',
-      });
-      setTasks((current) => upsert(current, result.task));
+      await updateTask(task.id, { status: task.status === 'done' ? 'todo' : 'done' });
+      loadTasks(true);
       reloadPlan();
     } catch (error) {
       setActionError(
@@ -117,8 +148,9 @@ export function TasksPage() {
           <h1 className="text-2xl font-semibold">Tasks</h1>
           {loadState === 'ready' && tasks.length > 0 && (
             <p className="text-sm text-muted-foreground">
+              {filtered && `Showing ${tasks.length} of ${total} · `}
               {openTasks.length} open · {tasks.length - openTasks.length} done · {hoursLeft} h of
-              work left · most urgent first
+              work left
             </p>
           )}
         </div>
@@ -137,7 +169,10 @@ export function TasksPage() {
           onRetry={loadTasks}
         />
       )}
-      {loadState === 'ready' && tasks.length === 0 && (
+      {loadState === 'ready' && total > 0 && (
+        <TaskFilterBar filters={filters} onChange={changeFilters} onClear={clearFilters} />
+      )}
+      {loadState === 'ready' && total === 0 && (
         <EmptyState
           icon={ListTodo}
           title="No tasks yet"
@@ -146,6 +181,18 @@ export function TasksPage() {
             <Button onClick={() => setEditor({})}>
               <Plus />
               Add your first task
+            </Button>
+          }
+        />
+      )}
+      {loadState === 'ready' && total > 0 && tasks.length === 0 && (
+        <EmptyState
+          icon={SearchX}
+          title="No tasks match these filters"
+          description="Try a different search, or clear the filters to see all your tasks."
+          action={
+            <Button variant="outline" onClick={clearFilters}>
+              Clear filters
             </Button>
           }
         />

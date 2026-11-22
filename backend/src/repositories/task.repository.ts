@@ -1,5 +1,7 @@
 import { isObjectIdOrHexString, type HydratedDocument } from 'mongoose';
+import type { QueryFilter } from 'mongoose';
 import { TaskModel, type Task } from '../models/task.js';
+import type { TaskQuery } from '../schemas/taskQuery.schema.js';
 
 export type TaskRecord = HydratedDocument<Task>;
 export type NewTaskFields = Pick<
@@ -65,4 +67,46 @@ export async function countAllDoneTasks(): Promise<number> {
 
 export async function deleteAllTasksForUser(userId: string): Promise<void> {
   await TaskModel.deleteMany({ userId });
+}
+
+const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// The database filter for a task list. It always starts with the owner, so no combination of
+// filters can ever reach another person's tasks.
+export function buildTaskFilter(userId: string, query: Partial<TaskQuery>): QueryFilter<Task> {
+  const filter: QueryFilter<Task> = { userId };
+  if (query.status === 'open') filter.status = { $ne: 'done' };
+  else if (query.status) filter.status = query.status;
+  if (query.category) filter.category = query.category;
+  if (query.q) filter.title = { $regex: escapeRegex(query.q), $options: 'i' };
+  if (query.dueAfter || query.dueBefore) {
+    filter.deadline = {
+      ...(query.dueAfter && { $gte: new Date(query.dueAfter) }),
+      ...(query.dueBefore && { $lt: new Date(query.dueBefore) }),
+    };
+  }
+  return filter;
+}
+
+const SORTS: Record<NonNullable<TaskQuery['sort']>, Record<string, 1 | -1>> = {
+  deadline: { deadline: 1 },
+  '-deadline': { deadline: -1 },
+  title: { title: 1 },
+  '-hours': { estimatedHours: -1, deadline: 1 },
+  newest: { createdAt: -1 },
+};
+
+const MAX_LISTED = 500;
+
+export async function searchTasksForUser(
+  userId: string,
+  query: Partial<TaskQuery>,
+): Promise<TaskRecord[]> {
+  return TaskModel.find(buildTaskFilter(userId, query))
+    .sort(SORTS[query.sort ?? 'deadline'])
+    .limit(MAX_LISTED);
+}
+
+export async function countTasksForUser(userId: string): Promise<number> {
+  return TaskModel.countDocuments({ userId });
 }
