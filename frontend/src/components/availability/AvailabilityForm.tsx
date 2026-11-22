@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldError } from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useAuth';
+import { DEFAULT_PREFERENCES, weekdayOrder } from '@/lib/preferences';
 
 // Index 0 is Sunday, because that is how the planner counts
 const WEEKDAY_NAMES = [
@@ -20,8 +22,6 @@ const WEEKDAY_NAMES = [
   'Friday',
   'Saturday',
 ];
-// The order the days are shown on screen: Monday first
-const SHOWN_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 const availabilitySchema = z.object({
   hours: z
@@ -39,6 +39,9 @@ type AvailabilityValues = z.infer<typeof availabilitySchema>;
 
 export function AvailabilityForm({ initial }: { initial: WeeklyHours }) {
   const [justSaved, setJustSaved] = useState(false);
+  const { user } = useAuth();
+  // The order the days are shown on screen follows the week start in the settings
+  const SHOWN_ORDER = weekdayOrder(user?.preferences.weekStart ?? DEFAULT_PREFERENCES.weekStart);
   const {
     register,
     control,

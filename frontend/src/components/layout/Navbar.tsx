@@ -21,6 +21,7 @@ const loggedInLinks: NavItem[] = [
   { to: '/plan', label: 'Plan' },
   { to: '/availability', label: 'Availability' },
   { to: '/profile', label: 'Profile' },
+  { to: '/settings', label: 'Settings' },
 ];
 
 // NavLink tells us whether its page is the current one, so the current link gets a highlight

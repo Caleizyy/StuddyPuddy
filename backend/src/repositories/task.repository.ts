@@ -62,3 +62,7 @@ export async function countAllOpenTasks(): Promise<number> {
 export async function countAllDoneTasks(): Promise<number> {
   return TaskModel.countDocuments({ status: 'done' });
 }
+
+export async function deleteAllTasksForUser(userId: string): Promise<void> {
+  await TaskModel.deleteMany({ userId });
+}

@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
 import { getCurrentUser, loginUser, logoutUser, type AuthUser } from '@/api/auth';
 import { setAuthToken, setUnauthorizedHandler, ApiError } from '@/api/client';
+import {
+  applyPreferences,
+  DEFAULT_PREFERENCES,
+  normalizePreferences,
+  readStoredPreferences,
+  watchSystemTheme,
+  type Preferences,
+} from '@/lib/preferences';
 import { AuthContext, type AuthStatus } from '@/lib/authContext';
 
 const TOKEN_KEY = 'studdypuddy.token';
@@ -73,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storeToken(result.token);
     setUser(result.user);
     setStatus('authenticated');
+    return result.user;
   }, []);
 
   const logout = useCallback(async () => {
@@ -90,13 +99,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     else clearSession();
   }, [clearSession, restoreSession]);
 
+  const replaceToken = useCallback((token: string) => {
+    activeToken.current = token;
+    setAuthToken(token);
+    storeToken(token);
+  }, []);
+
   const updateUser = useCallback((changes: Partial<AuthUser>) => {
     setUser((current) => (current ? { ...current, ...changes } : current));
   }, []);
 
+  // The saved look follows the person who is signed in
+  useEffect(() => {
+    if (user) applyPreferences(normalizePreferences(user.preferences));
+  }, [user]);
+
+  // "System" theme follows the device while the page is open
+  const latest = useRef<Preferences>(DEFAULT_PREFERENCES);
+  latest.current = normalizePreferences(user?.preferences ?? readStoredPreferences());
+  useEffect(() => watchSystemTheme(() => latest.current), []);
+
   const value = useMemo(
-    () => ({ user, status, login, logout, retry, updateUser }),
-    [user, status, login, logout, retry, updateUser],
+    () => ({
+      user,
+      status,
+      login,
+      logout,
+      retry,
+      updateUser,
+      replaceToken,
+      endSession: clearSession,
+    }),
+    [user, status, login, logout, retry, updateUser, replaceToken, clearSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -10,6 +10,7 @@ import {
 import type { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 import { AppError } from '../utils/AppError.js';
 import { toDataUrl } from '../utils/image.js';
+import { toPreferences, type Preferences } from '../utils/preferences.js';
 import { signToken } from '../utils/token.js';
 
 // What the app needs to know about the signed-in person
@@ -20,6 +21,7 @@ function toAuthUser(user: {
   role?: string | null;
   username?: string | null;
   avatar?: { data: Buffer; contentType: string } | null;
+  preferences?: Partial<Preferences> | null;
 }) {
   return {
     id: user.id,
@@ -28,6 +30,7 @@ function toAuthUser(user: {
     role: user.role,
     username: user.username ?? null,
     avatar: toDataUrl(user.avatar),
+    preferences: toPreferences(user.preferences),
   };
 }
 

@@ -15,3 +15,7 @@ export async function saveAvailabilityForUser(userId: string, hoursByWeekday: nu
     })),
   );
 }
+
+export async function deleteAvailabilityForUser(userId: string) {
+  await AvailabilityModel.deleteMany({ userId });
+}

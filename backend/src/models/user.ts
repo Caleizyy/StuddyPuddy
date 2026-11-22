@@ -4,6 +4,10 @@ import { Schema, model, type InferSchemaType } from 'mongoose';
 export const USER_ROLES = ['user', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+export const THEMES = ['system', 'light', 'dark'] as const;
+export const WEEK_STARTS = ['monday', 'sunday'] as const;
+export const DEFAULT_PAGES = ['dashboard', 'tasks', 'plan'] as const;
+
 // A small picture the user chose. Kept out of normal queries (select: false) because the user is
 // loaded on every request and the picture is only needed on the profile and on sign-in.
 const avatarSchema = new Schema(
@@ -21,6 +25,13 @@ const userSchema = new Schema(
     // A public handle chosen by the user: lowercase letters, digits and underscores. Optional.
     username: { type: String, lowercase: true, trim: true },
     avatar: { type: avatarSchema, select: false },
+    // How the app looks and where it opens. Applied by the browser; the server only stores it.
+    preferences: {
+      theme: { type: String, enum: THEMES, default: 'system' },
+      weekStart: { type: String, enum: WEEK_STARTS, default: 'monday' },
+      defaultPage: { type: String, enum: DEFAULT_PAGES, default: 'dashboard' },
+      compact: { type: Boolean, default: false },
+    },
     // This client's own setting: never plan more than this many hours on one day. null means no limit.
     maxHoursPerDay: { type: Number, min: 0.25, max: 24, default: null },
   },
