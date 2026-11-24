@@ -4,6 +4,9 @@ import {
   deleteTask,
   getTask,
   listTasks,
+  markStep,
+  replaceSteps,
+  splitTask,
   updateTask,
 } from '../services/task.service.js';
 
@@ -32,4 +35,17 @@ export async function update(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   await deleteTask(req.userId!, taskIdFrom(req));
   res.status(204).end();
+}
+
+export async function split(req: Request, res: Response) {
+  res.status(201).json({ task: await splitTask(req.userId!, taskIdFrom(req)) });
+}
+
+export async function putSteps(req: Request, res: Response) {
+  res.json({ task: await replaceSteps(req.userId!, taskIdFrom(req), req.body) });
+}
+
+export async function patchStep(req: Request, res: Response) {
+  const stepId = Array.isArray(req.params.stepId) ? req.params.stepId[0] : req.params.stepId;
+  res.json({ task: await markStep(req.userId!, taskIdFrom(req), stepId, req.body) });
 }

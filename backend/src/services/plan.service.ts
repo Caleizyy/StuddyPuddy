@@ -25,7 +25,18 @@ export async function getPlanForUser(userId: string, now: Date) {
 
   try {
     const plan = buildPlan({ tasks: planTasks, hoursByWeekday, now, settings });
-    return { generatedAt: now, settings, ...plan };
+    // Each item also says which topic to work on next, taken from the task's own steps
+    const stepsByTask = new Map(tasks.map((task) => [task.id, task.steps ?? []]));
+    const items = plan.items.map((item) => {
+      const steps = stepsByTask.get(item.taskId) ?? [];
+      return {
+        ...item,
+        nextStep: steps.find((step) => !step.done)?.title ?? null,
+        stepsDone: steps.filter((step) => step.done).length,
+        stepsTotal: steps.length,
+      };
+    });
+    return { generatedAt: now, settings, ...plan, items };
   } catch (error) {
     // The core says which field is wrong. We turn that into a normal API error.
     if (error instanceof PlanningInputError) {

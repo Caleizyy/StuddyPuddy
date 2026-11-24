@@ -3,7 +3,15 @@ import { useSearchParams } from 'react-router';
 import { ListTodo, Plus, SearchX } from 'lucide-react';
 import type { PlanItem } from '@/api/plan';
 import { ApiError } from '@/api/client';
-import { listTasks, updateTask, type Task } from '@/api/tasks';
+import {
+  listTasks,
+  setStepDone,
+  splitTask,
+  updateTask,
+  type Task,
+  type TaskStep,
+} from '@/api/tasks';
+import { TopicsDialog } from '@/components/tasks/TopicsDialog';
 import { DeleteTaskDialog } from '@/components/tasks/DeleteTaskDialog';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDialog } from '@/components/tasks/TaskDialog';
@@ -46,6 +54,7 @@ export function TasksPage() {
   // null: closed. {}: add a task. { task }: edit that task.
   const [editor, setEditor] = useState<{ task?: Task } | null>(null);
   const [deleting, setDeleting] = useState<Task | null>(null);
+  const [topicsFor, setTopicsFor] = useState<Task | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const { state: planState, reload: reloadPlan } = usePlan();
@@ -138,6 +147,21 @@ export function TasksPage() {
     }
   }
 
+  // Runs a change on one task, then fetches the list again so it matches the filters
+  async function runOnTask(task: Task, action: () => Promise<unknown>, fallback: string) {
+    setBusyId(task.id);
+    setActionError(null);
+    try {
+      await action();
+      loadTasks(true);
+      reloadPlan();
+    } catch (error) {
+      setActionError(error instanceof ApiError ? error.message : fallback);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   const openTasks = tasks.filter((task) => task.status !== 'done');
   const hoursLeft = openTasks.reduce((sum, task) => sum + task.estimatedHours, 0);
 
@@ -208,6 +232,21 @@ export function TasksPage() {
               onToggleDone={() => void handleToggleDone(task)}
               onEdit={() => setEditor({ task })}
               onDelete={() => setDeleting(task)}
+              onSplit={() =>
+                void runOnTask(
+                  task,
+                  () => splitTask(task.id),
+                  'Could not split the task. Please try again.',
+                )
+              }
+              onToggleStep={(step: TaskStep) =>
+                void runOnTask(
+                  task,
+                  () => setStepDone(task.id, step.id, !step.done),
+                  'Could not update the topic. Please try again.',
+                )
+              }
+              onEditSteps={() => setTopicsFor(task)}
             />
           ))}
         </ul>
@@ -215,6 +254,17 @@ export function TasksPage() {
 
       {editor && (
         <TaskDialog task={editor.task} onClose={() => setEditor(null)} onSaved={handleSaved} />
+      )}
+      {topicsFor && (
+        <TopicsDialog
+          task={topicsFor}
+          onClose={() => setTopicsFor(null)}
+          onSaved={() => {
+            setTopicsFor(null);
+            loadTasks(true);
+            reloadPlan();
+          }}
+        />
       )}
       {deleting && (
         <DeleteTaskDialog
