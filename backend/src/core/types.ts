@@ -11,6 +11,8 @@ export type PlanTask = {
   title: string;
   deadline: Date;
   estimatedHours: number;
+  // Hours already studied for this task. Missing means none. The plan only schedules what is left.
+  loggedHours?: number;
   createdAt: Date;
   status: TaskStatus;
 };
@@ -38,6 +40,8 @@ export type PlanItem = {
   availableHours: number;
   scheduledHours: number;
   unscheduledHours: number;
+  loggedHours: number; // hours already studied
+  remainingHours: number; // estimate minus logged, never below 0: this is what gets scheduled
 };
 
 export type ScheduleEntry = { date: string; taskId: string; title: string; hours: number };

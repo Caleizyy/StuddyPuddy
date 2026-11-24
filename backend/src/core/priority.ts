@@ -1,4 +1,5 @@
 import { addDays, daysBetween } from './dates.js';
+import { remainingHours } from './validation.js';
 import type { PlanTask, PriorityBand, Ranked, TaskAssessment } from './types.js';
 
 export const MAX_SCORE = 1_000_000;
@@ -30,6 +31,20 @@ export function availableHoursUntil(days: number, hoursByWeekday: number[], now:
 
 export function assessTask(task: PlanTask, hoursByWeekday: number[], now: Date): TaskAssessment {
   const daysLeft = daysBetween(now, task.deadline);
+  const hoursNeeded = remainingHours(task);
+
+  // Everything is already studied: there is nothing left to be late with, so it is not urgent
+  if (hoursNeeded === 0) {
+    const remainingDays = Math.max(1, daysLeft);
+    return {
+      remainingDays: daysLeft < 0 ? 0 : remainingDays,
+      availableHours: daysLeft < 0 ? 0 : availableHoursUntil(remainingDays, hoursByWeekday, now),
+      score: 0,
+      band: 'low',
+      atRisk: false,
+      overdue: false,
+    };
+  }
 
   if (daysLeft < 0) {
     return {
@@ -47,7 +62,7 @@ export function assessTask(task: PlanTask, hoursByWeekday: number[], now: Date):
 
   let score = MAX_SCORE; // no study time at all means maximum priority
   if (availableHours > 0) {
-    score = (task.estimatedHours / availableHours) * (1 / remainingDays);
+    score = (hoursNeeded / availableHours) * (1 / remainingDays);
   }
 
   return {
@@ -55,7 +70,7 @@ export function assessTask(task: PlanTask, hoursByWeekday: number[], now: Date):
     availableHours,
     score,
     band: bandFor(score),
-    atRisk: availableHours < task.estimatedHours,
+    atRisk: availableHours < hoursNeeded,
     overdue: false,
   };
 }
@@ -67,9 +82,9 @@ export function compareRanked(a: Ranked, b: Ranked): number {
   if (a.task.deadline.getTime() !== b.task.deadline.getTime()) {
     return a.task.deadline.getTime() - b.task.deadline.getTime();
   }
-  if (a.task.estimatedHours !== b.task.estimatedHours) {
-    return b.task.estimatedHours - a.task.estimatedHours;
-  }
+  const aLeft = remainingHours(a.task);
+  const bLeft = remainingHours(b.task);
+  if (aLeft !== bLeft) return bLeft - aLeft;
   if (a.task.createdAt.getTime() !== b.task.createdAt.getTime()) {
     return a.task.createdAt.getTime() - b.task.createdAt.getTime();
   }

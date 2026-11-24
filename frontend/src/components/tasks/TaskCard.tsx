@@ -1,4 +1,4 @@
-import { BookOpen, Check, Clock, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import { BookOpen, Check, Clock, Pencil, RotateCcw, Timer, Trash2 } from 'lucide-react';
 import type { Task, TaskStep } from '@/api/tasks';
 import { TaskSteps } from '@/components/tasks/TaskSteps';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import type { PlanItem } from '@/api/plan';
 import { PriorityBadge } from '@/components/plan/PriorityBadge';
 import { formatScore } from '@/lib/priority';
+import { loggedPercent } from '@/lib/timeLog';
 
 const CATEGORY_DOT: Record<TaskCategory, string> = {
   homework: 'bg-chart-1',
@@ -34,6 +35,7 @@ type TaskCardProps = {
   onToggleDone: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onLogTime: () => void;
   onSplit: () => void;
   onToggleStep: (step: TaskStep) => void;
   onEditSteps: () => void;
@@ -46,6 +48,7 @@ export function TaskCard({
   onToggleDone,
   onEdit,
   onDelete,
+  onLogTime,
   onSplit,
   onToggleStep,
   onEditSteps,
@@ -83,13 +86,28 @@ export function TaskCard({
       <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Clock className="size-4" aria-hidden />
-          {task.estimatedHours} h estimated
+          {task.loggedHours > 0
+            ? `${task.loggedHours} of ${task.estimatedHours} h studied`
+            : `${task.estimatedHours} h estimated`}
         </span>
         <span className="flex items-center gap-1.5">
           <BookOpen className="size-4" aria-hidden />
           {task.moduleCount} {task.moduleCount === 1 ? 'module' : 'modules'}
         </span>
       </div>
+
+      {task.loggedHours > 0 && (
+        <div
+          role="progressbar"
+          aria-label="Time studied"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={loggedPercent(task)}
+          className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
+        >
+          <div className="h-full bg-chart-2" style={{ width: `${loggedPercent(task)}%` }} />
+        </div>
+      )}
 
       <TaskSteps
         task={task}
@@ -103,6 +121,10 @@ export function TaskCard({
         <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
           {isDone ? <RotateCcw /> : <Check />}
           {isDone ? 'Reopen' : 'Mark done'}
+        </Button>
+        <Button variant="outline" size="sm" onClick={onLogTime}>
+          <Timer />
+          Log time
         </Button>
         <Button variant="ghost" size="icon-sm" aria-label={`Edit ${task.title}`} onClick={onEdit}>
           <Pencil />

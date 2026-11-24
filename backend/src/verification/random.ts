@@ -32,15 +32,21 @@ export function randomCase(seed: number): PlanCase {
   );
 
   const taskCount = whole(random, 0, 15);
-  const tasks: PlanTask[] = Array.from({ length: taskCount }, (_, index) => ({
-    id: `r${index}`,
-    title: `Task ${index}`,
-    // from 3 days overdue to 60 days away; some due today
-    deadline: addDays(NOW, whole(random, -3, 60)),
-    estimatedHours: quarterHours(random, 0.25, 40),
-    createdAt: new Date(Date.UTC(2026, 10, 1, 0, index)),
-    status: random() < 0.15 ? 'done' : random() < 0.5 ? 'in_progress' : 'todo',
-  }));
+  const tasks: PlanTask[] = Array.from({ length: taskCount }, (_, index) => {
+    const estimatedHours = quarterHours(random, 0.25, 40);
+    // About a third of the tasks have some time logged, sometimes more than the estimate
+    const loggedHours = random() < 0.35 ? quarterHours(random, 0, estimatedHours + 2) : 0;
+    return {
+      id: `r${index}`,
+      title: `Task ${index}`,
+      // from 3 days overdue to 60 days away; some due today
+      deadline: addDays(NOW, whole(random, -3, 60)),
+      estimatedHours,
+      ...(loggedHours > 0 && { loggedHours }),
+      createdAt: new Date(Date.UTC(2026, 10, 1, 0, index)),
+      status: random() < 0.15 ? 'done' : random() < 0.5 ? 'in_progress' : 'todo',
+    } satisfies PlanTask;
+  });
 
   const settings = random() < 0.5 ? { maxHoursPerDay: quarterHours(random, 0.25, 24) } : undefined;
   return { tasks, hoursByWeekday, now: NOW, settings };

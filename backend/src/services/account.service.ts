@@ -97,6 +97,11 @@ export async function exportData(userId: string) {
       moduleCount: task.moduleCount,
       estimatedHours: task.estimatedHours,
       status: task.status,
+      timeEntries: (task.timeEntries ?? []).map((entry) => ({
+        date: entry.date,
+        hours: entry.hours,
+        note: entry.note ?? null,
+      })),
       steps: (task.steps ?? []).map((step) => ({
         title: step.title,
         hours: step.hours,

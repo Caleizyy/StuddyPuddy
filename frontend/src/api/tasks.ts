@@ -6,6 +6,8 @@ export type TaskStep = { id: string; title: string; hours: number; done: boolean
 // A topic as it is sent when saving: new ones have no id yet
 export type StepDraft = { id?: string; title: string; hours: number; done: boolean };
 
+export type TimeEntry = { id: string; date: string; hours: number; note: string | null };
+
 export type Task = {
   id: string;
   title: string;
@@ -15,11 +17,16 @@ export type Task = {
   estimatedHours: number;
   status: TaskStatus;
   steps: TaskStep[];
+  loggedHours: number;
+  timeEntries: TimeEntry[]; // newest day first
   createdAt: string;
   updatedAt: string;
 };
 
-export type NewTask = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'steps'>;
+export type NewTask = Omit<
+  Task,
+  'id' | 'createdAt' | 'updatedAt' | 'steps' | 'loggedHours' | 'timeEntries'
+>;
 
 export type TaskChanges = Partial<NewTask>;
 
@@ -41,3 +48,10 @@ export const saveSteps = (id: string, steps: StepDraft[]) =>
 
 export const setStepDone = (taskId: string, stepId: string, done: boolean) =>
   api.patch<{ task: Task }>(`/tasks/${taskId}/steps/${stepId}`, { done });
+
+// date is the day studied as 2026-11-22; leave it out for today
+export const logTime = (id: string, entry: { hours: number; date?: string; note?: string }) =>
+  api.post<{ task: Task }>(`/tasks/${id}/time`, entry);
+
+export const removeTimeEntry = (taskId: string, entryId: string) =>
+  api.delete<{ task: Task }>(`/tasks/${taskId}/time/${entryId}`);

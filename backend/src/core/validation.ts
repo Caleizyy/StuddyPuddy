@@ -8,6 +8,12 @@ export function isQuarterHours(value: number): boolean {
   return value % 0.25 === 0;
 }
 
+// The hours still to study: the estimate minus what was logged, never below 0.
+// Logged time beyond the estimate simply means nothing is left.
+export function remainingHours(task: Pick<PlanTask, 'estimatedHours' | 'loggedHours'>): number {
+  return Math.max(0, task.estimatedHours - (task.loggedHours ?? 0));
+}
+
 export function validateTask(task: PlanTask): void {
   if (Number.isNaN(task.deadline.getTime())) {
     throw new PlanningInputError('deadline', `"${task.title}": deadline is required`, task.id);
@@ -24,6 +30,14 @@ export function validateTask(task: PlanTask): void {
     throw new PlanningInputError(
       'estimatedHours',
       `"${task.title}": estimated hours must be at most ${MAX_TASK_HOURS}, in steps of 0.25`,
+      task.id,
+    );
+  }
+  const logged = task.loggedHours ?? 0;
+  if (!Number.isFinite(logged) || logged < 0 || !isQuarterHours(logged)) {
+    throw new PlanningInputError(
+      'loggedHours',
+      `"${task.title}": logged hours must be 0 or more, in steps of 0.25`,
       task.id,
     );
   }

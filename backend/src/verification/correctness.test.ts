@@ -110,6 +110,34 @@ describe('correctness: the checks can fail', () => {
   });
 });
 
+describe('correctness: logged time', () => {
+  const input = buildScenarios().find((scenario) => scenario.id === 'S11')!.input;
+
+  it('accepts a plan that schedules only what is left', () => {
+    expect(checkHoursAddUp(input, runPlan(input))).toEqual([]);
+  });
+
+  it('notices a plan that ignores the logged hours', () => {
+    const ignoring = runPlan({
+      ...input,
+      tasks: input.tasks.map((task) => ({ ...task, loggedHours: 0 })),
+    });
+    expect(checkHoursAddUp(input, ignoring)).not.toEqual([]);
+  });
+
+  it('notices a planner that is made to treat logged time as extra work (R9)', () => {
+    // a task whose logged hours are ignored would not get a quarter hour off, so R9 would fire
+    const target = runPlan(input).items[0];
+    expect(target.remainingHours).toBe(2);
+    const more = runPlan({
+      ...input,
+      tasks: input.tasks.map((task) => ({ ...task, loggedHours: 4.25 })),
+    }).items[0];
+    expect(more.remainingHours).toBe(1.75);
+    expect(more.priorityScore).toBeLessThanOrEqual(target.priorityScore);
+  });
+});
+
 describe('correctness: the random inputs are repeatable', () => {
   it('gives the same numbers for the same seed', () => {
     const a = makeRandom(42);

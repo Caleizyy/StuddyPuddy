@@ -4,6 +4,7 @@
 
 import { addDays, dateKey } from '../core/dates.js';
 import type { Plan, PlanSettings, PlanTask } from '../core/types.js';
+import { remainingHours } from '../core/validation.js';
 
 export type PlanCase = {
   tasks: PlanTask[];
@@ -42,8 +43,8 @@ export function checkDailyMaximum(input: PlanCase, plan: Plan): string[] {
   return problems;
 }
 
-// R2: hours add up. Scheduled plus unscheduled is exactly the estimate, and the list of
-// days agrees with the task summary
+// R2: hours add up. Scheduled plus unscheduled is exactly what is left of the estimate after the
+// logged hours, and the list of days agrees with the task summary
 export function checkHoursAddUp(input: PlanCase, plan: Plan): string[] {
   const problems: string[] = [];
   const perTask = sumByKey(
@@ -57,8 +58,10 @@ export function checkHoursAddUp(input: PlanCase, plan: Plan): string[] {
       problems.push(`${item.title}: appears in the plan but is not one of the tasks`);
       continue;
     }
-    if (item.scheduledHours + item.unscheduledHours !== task.estimatedHours) {
-      problems.push(`${item.title}: scheduled and unscheduled hours do not add up to the estimate`);
+    if (item.scheduledHours + item.unscheduledHours !== remainingHours(task)) {
+      problems.push(
+        `${item.title}: scheduled and unscheduled hours do not add up to the hours left`,
+      );
     }
     if ((perTask.get(item.taskId) ?? 0) !== item.scheduledHours) {
       problems.push(`${item.title}: the day-by-day hours differ from the task's scheduled hours`);
@@ -147,7 +150,7 @@ export type NamedCheck = {
 
 export const CHECKS: NamedCheck[] = [
   { id: 'R1', name: 'No day exceeds the daily maximum', run: checkDailyMaximum },
-  { id: 'R2', name: 'Planned hours add up to each estimate', run: checkHoursAddUp },
+  { id: 'R2', name: 'Planned hours add up to the hours left on each task', run: checkHoursAddUp },
   { id: 'R3', name: 'Every study day is before the deadline', run: checkDates },
   { id: 'R4', name: 'Exactly the unfinished tasks are planned', run: checkWhichTasks },
   {
