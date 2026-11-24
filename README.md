@@ -2,7 +2,16 @@
 
 StuddyPuddy is a study planner. You enter your deadlines and how many hours you can study on each weekday, and the app builds a day-by-day plan. It ranks tasks by urgency, spreads the hours over the days you have, and warns you when the deadlines cannot all be met.
 
-Each user only ever sees their own tasks, hours and plan.
+Each user only ever sees their own tasks, hours and plan. There are two roles: `user` (everyone who registers) and `admin`, who can only see totals (accounts, open and finished tasks), never anyone's tasks or hours. Each user can also set a personal daily study limit that caps every day of their own plan.
+
+## Documents and checks (stage 3)
+
+- Architecture document (Lithuanian): [docs/architekturos-dokumentas.docx](docs/architekturos-dokumentas.docx)
+- Stage 1 design document: [1-etapo-pateikimo-sablonas.md](1-etapo-pateikimo-sablonas.md)
+- Main quality attribute, correctness: `npm run verify:correctness -w backend`, results in [docs/verification-correctness.md](docs/verification-correctness.md) (see "Verifying correctness" below)
+- Second quality attribute, security: `npm run verify:security -w backend`, results in [docs/verification-security.md](docs/verification-security.md)
+- Whole system in containers: `docker compose up --build` (see "Run with Docker" below)
+- Cloud deployment (Render and MongoDB Atlas): [docs/deployment.md](docs/deployment.md)
 
 ## Main function
 
@@ -88,10 +97,12 @@ The server keeps no state of its own between requests (the login token carries t
 npm run seed
 ```
 
-This creates two sample users, both with the password from `SEED_PASSWORD`:
+This creates four sample users, all with the password from `SEED_PASSWORD`:
 
 - `normal@example.com`: a comfortable workload with no conflicts
 - `conflict@example.com`: more work than the hours allow, so the plan shows warnings
+- `compare@example.com`: exactly the same tasks and hours as `normal@example.com`, for showing that one user's daily limit changes only that user's plan
+- `admin@example.com`: the administrator, who sees only the totals on the **Usage** page. This account has a known password, so never seed a database that is reachable from the internet (the seed refuses to run in production). Make the real admin with `npm run create-admin -w backend`.
 
 The seed deletes all existing users, tasks and availability in the configured database before creating the sample users, so it refuses to run unless `ALLOW_SEED_WIPE=true` is set in `backend/.env`. Only use it on a database you can wipe.
 

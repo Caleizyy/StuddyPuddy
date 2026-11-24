@@ -73,5 +73,23 @@ services:
       mongo:
         condition: service_healthy
 
+  # Makes one administrator by hand (nobody can become an admin through the app):
+  #   ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=a-long-password docker compose --profile tools run --rm create-admin
+  create-admin:
+    profiles: ['tools']
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/studdypuddy}
+      JWT_SECRET: ${JWT_SECRET:-demo-only-secret-change-me-before-real-use-0123456789}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    command: ['node', 'dist/seed/createAdmin.js']
+    depends_on:
+      mongo:
+        condition: service_healthy
+
 volumes:
   mongo-data:

@@ -4,9 +4,9 @@ export class DuplicateEmailError extends Error {}
 
 type NewUser = { name: string; email: string; passwordHash: string };
 
-export async function createUser(data: NewUser) {
+async function insertUser(data: NewUser, role?: 'admin') {
   try {
-    return await UserModel.create(data);
+    return await UserModel.create(role ? { ...data, role } : data);
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'code' in error && error.code === 11000) {
       throw new DuplicateEmailError('Email already registered');
@@ -14,6 +14,11 @@ export async function createUser(data: NewUser) {
     throw error;
   }
 }
+
+export const createUser = (data: NewUser) => insertUser(data);
+
+// Only used by the create-admin command; the app itself has no way to make an admin
+export const createAdminUser = (data: NewUser) => insertUser(data, 'admin');
 
 export function findUserByEmailWithHash(email: string) {
   return UserModel.findOne({ email }).select('+passwordHash');

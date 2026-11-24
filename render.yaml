@@ -1,0 +1,40 @@
+# Deploys StuddyPuddy to Render: the API as a Docker web service and the web app as a static site.
+# The database is MongoDB Atlas (free tier). Step by step: docs/deployment.md
+#
+# Values marked "sync: false" are asked for in the Render dashboard the first time you apply
+# this file, so no secret is ever stored in the repository.
+
+services:
+  - type: web
+    name: studdypuddy-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # the Atlas connection string
+      - key: JWT_SECRET
+        generateValue: true # Render makes a long random value
+      - key: CORS_ORIGIN
+        sync: false # the web app's address, for example https://studdypuddy-web.onrender.com
+      - key: TRUST_PROXY_HOPS
+        value: '1' # Render's load balancer sits in front of the API
+
+  - type: web
+    name: studdypuddy-web
+    runtime: static
+    buildCommand: npm ci --ignore-scripts && npm run build --workspace frontend
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: VITE_API_URL
+        sync: false # the API's address, for example https://studdypuddy-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
