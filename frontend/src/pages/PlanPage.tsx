@@ -1,23 +1,28 @@
+import { ClipboardList } from 'lucide-react';
 import { Link } from 'react-router';
 import type { Plan } from '@/api/plan';
 import { DaySchedule } from '@/components/plan/DaySchedule';
 import { PlanWarnings } from '@/components/plan/PlanWarnings';
 import { PriorityList } from '@/components/plan/PriorityList';
-import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/states/ErrorState';
+import { LoadingState } from '@/components/states/LoadingState';
+import { EmptyState } from '@/components/states/EmptyState';
+import { buttonVariants } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 
 function PlanContent({ plan }: { plan: Plan }) {
   if (plan.items.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-8 text-center">
-        <p className="text-muted-foreground">
-          You have no unfinished tasks.{' '}
-          <Link to="/tasks" className="text-primary underline">
+      <EmptyState
+        icon={ClipboardList}
+        title="Nothing to plan yet"
+        description="You have no unfinished tasks. Add a task and your plan appears here."
+        action={
+          <Link to="/tasks" className={buttonVariants()}>
             Add a task
-          </Link>{' '}
-          and your plan appears here.
-        </p>
-      </div>
+          </Link>
+        }
+      />
     );
   }
 
@@ -73,14 +78,9 @@ export function PlanPage() {
         </p>
       </div>
 
-      {state.status === 'loading' && <p className="text-muted-foreground">Loading...</p>}
+      {state.status === 'loading' && <LoadingState label="Building your plan..." />}
       {state.status === 'error' && (
-        <div className="space-y-3">
-          <p className="text-destructive">{state.message}</p>
-          <Button variant="outline" onClick={reload}>
-            Try again
-          </Button>
-        </div>
+        <ErrorState title="We could not build your plan" message={state.message} onRetry={reload} />
       )}
       {state.status === 'ready' && <PlanContent plan={state.plan} />}
     </main>

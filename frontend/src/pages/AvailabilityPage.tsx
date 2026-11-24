@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getAvailability, type WeeklyHours } from '@/api/availability';
 import { getSettings } from '@/api/settings';
 import { AvailabilityForm } from '@/components/availability/AvailabilityForm';
 import { DailyLimitForm } from '@/components/availability/DailyLimitForm';
+import { ErrorState } from '@/components/states/ErrorState';
+import { LoadingState } from '@/components/states/LoadingState';
 
 type LoadState =
   | { status: 'loading' }
@@ -12,7 +14,8 @@ type LoadState =
 export function AvailabilityPage() {
   const [state, setState] = useState<LoadState>({ status: 'loading' });
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setState({ status: 'loading' });
     // Both come from the server; the page shows once both have arrived
     Promise.all([getAvailability(), getSettings()])
       .then(([availability, settings]) =>
@@ -25,6 +28,10 @@ export function AvailabilityPage() {
       .catch(() => setState({ status: 'error' }));
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
   return (
     <main className="mx-auto max-w-xl space-y-6 p-8">
       <div>
@@ -35,11 +42,13 @@ export function AvailabilityPage() {
         </p>
       </div>
 
-      {state.status === 'loading' && <p className="text-muted-foreground">Loading...</p>}
+      {state.status === 'loading' && <LoadingState />}
       {state.status === 'error' && (
-        <p className="text-destructive">
-          Could not load your availability. Reload the page to try again.
-        </p>
+        <ErrorState
+          title="We could not load your availability"
+          message="Your hours are safe. Check your connection and try again."
+          onRetry={load}
+        />
       )}
       {state.status === 'ready' && (
         <>

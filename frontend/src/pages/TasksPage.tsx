@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ListTodo, Plus } from 'lucide-react';
 import type { PlanItem } from '@/api/plan';
 import { ApiError } from '@/api/client';
 import { listTasks, updateTask, type Task } from '@/api/tasks';
 import { DeleteTaskDialog } from '@/components/tasks/DeleteTaskDialog';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDialog } from '@/components/tasks/TaskDialog';
+import { EmptyState } from '@/components/states/EmptyState';
+import { ErrorState } from '@/components/states/ErrorState';
+import { LoadingState } from '@/components/states/LoadingState';
 import { Button } from '@/components/ui/button';
 import { usePlan } from '@/hooks/usePlan';
 
@@ -41,7 +44,8 @@ export function TasksPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const { state: planState, reload: reloadPlan } = usePlan();
 
-  useEffect(() => {
+  const loadTasks = useCallback(() => {
+    setLoadState('loading');
     listTasks()
       .then((result) => {
         // Keep any task that was created while the list was still loading
@@ -54,6 +58,10 @@ export function TasksPage() {
       })
       .catch(() => setLoadState('error'));
   }, []);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   // The plan, looked up by task id, with each task's position in the priority order
   const planInfo = useMemo(() => {
@@ -121,14 +129,26 @@ export function TasksPage() {
       </div>
 
       {actionError && <p className="text-sm text-destructive">{actionError}</p>}
-      {loadState === 'loading' && <p className="text-muted-foreground">Loading...</p>}
+      {loadState === 'loading' && <LoadingState />}
       {loadState === 'error' && (
-        <p className="text-destructive">Could not load your tasks. Reload the page to try again.</p>
+        <ErrorState
+          title="We could not load your tasks"
+          message="Your tasks are safe. Check your connection and try again."
+          onRetry={loadTasks}
+        />
       )}
       {loadState === 'ready' && tasks.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border p-8 text-center">
-          <p className="text-muted-foreground">No tasks yet. Add your first one to get started.</p>
-        </div>
+        <EmptyState
+          icon={ListTodo}
+          title="No tasks yet"
+          description="Add your first deadline and StuddyPuddy will work out what to study and when."
+          action={
+            <Button onClick={() => setEditor({})}>
+              <Plus />
+              Add your first task
+            </Button>
+          }
+        />
       )}
       {loadState === 'ready' && tasks.length > 0 && (
         <ul className="space-y-3">
