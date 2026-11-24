@@ -22,8 +22,13 @@ The tests are in `backend/src/security/`. They run without a database (the user 
 | S6  | Security headers are set                                                              | `X-Powered-By` absent, `nosniff`, frame and HSTS headers present (helmet)                                                                                                                                | present  | 1 of 1 test passes  |
 | S7  | Only the configured web address may use the API from a browser                        | The API answers with the one configured address, never another origin and never `*`                                                                                                                      | as said  | 2 of 2 tests pass   |
 | S8  | Guessing passwords is slowed down                                                     | After 5 wrong passwords an account is locked, even for the right password, and other accounts are not affected. One address trying many accounts is limited, and a faked forwarding header does not help | 429      | 3 of 3 tests pass   |
+| S9  | A request body must be JSON                                                           | A web form, plain text and XML body are refused with 415 before any code reads them; JSON with a charset is accepted                                                                                     | 415      | 6 of 6 tests pass   |
+| S10 | Private answers are not cached                                                        | Every `/api` answer, including errors, carries `Cache-Control: no-store`                                                                                                                                 | no-store | 3 of 3 tests pass   |
+| S11 | A new password must not be an easy guess                                              | Common passwords (any letter case), a password equal to the email address and one above bcrypt's 72 bytes are refused; a normal passphrase is accepted                                                   | 400      | 8 of 8 tests pass   |
+| S12 | The API as a whole is rate limited                                                    | After the limit (lowered to 5 for the test) the API answers 429 with the standard `RateLimit` headers; the health check is never limited                                                                 | 429      | 2 of 2 tests pass   |
+| S13 | Creating accounts is limited per address                                              | The third account in a row from one address is refused with 429, even with valid data                                                                                                                    | 429      | 1 of 1 test passes  |
 
-Each rule was also proven able to fail: when the code was broken on purpose (a route without its login check, the token algorithm not pinned, helmet removed, input validation removed) the matching tests failed.
+Each rule was also proven able to fail: when the code was broken on purpose (a route without its login check, the token algorithm not pinned, helmet removed, input validation removed, the JSON check, `no-store`, the password list or either rate limiter removed) the matching tests failed.
 
 ## What this does not cover (honest limits)
 
@@ -31,4 +36,5 @@ Each rule was also proven able to fail: when the code was broken on purpose (a r
 - The login limiter counts attempts in memory of each API process. With more than one copy of the API (`--scale backend=2`) every copy counts for itself, so the limit is looser. A shared store (for example Redis) would fix that.
 - The containers speak plain HTTP. In a real deployment HTTPS is provided in front of them (the hosting platform or a reverse proxy).
 - The admin account is created by hand (see the deployment notes) and sees counts only, so a stolen admin login exposes no personal data.
-- Passwords are stored with bcrypt, but there is no email check, password reset or two-step login.
+- Passwords are stored with bcrypt and checked against a short list of the most common ones, not a full breach list. There is no email check, password reset or two-step login.
+- The whole-API and account limits are counted in memory per API copy, like the login limits. Behind nginx they depend on `TRUST_PROXY_HOPS=1`; without it every visitor would look like one address.

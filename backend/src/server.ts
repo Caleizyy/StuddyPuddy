@@ -9,4 +9,9 @@ try {
   process.exit(1);
 }
 
-createApp().listen(config.port, () => console.log(`API listening on port ${config.port}`));
+const server = createApp().listen(config.port, () =>
+  console.log(`API listening on port ${config.port}`),
+);
+// Slow or stalled clients cannot hold a connection open forever
+server.headersTimeout = 15_000;
+server.requestTimeout = 30_000;

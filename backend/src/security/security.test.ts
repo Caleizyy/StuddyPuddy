@@ -184,6 +184,7 @@ describe('S4: input that is not what we expect is refused', () => {
       .post('/api/auth/login')
       .send({ email: 'a@example.com', password: 'x'.repeat(200_000) });
     expect(response.status).toBe(413);
+    expect(response.body.error.code).toBe('PAYLOAD_TOO_LARGE');
   });
 
   it('broken JSON gets a clean 400 without internals', async () => {

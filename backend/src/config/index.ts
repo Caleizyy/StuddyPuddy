@@ -43,5 +43,15 @@ export const config = {
     perIp: positiveIntFromEnv('LOGIN_LIMIT_PER_IP', 20),
     perEmail: positiveIntFromEnv('LOGIN_LIMIT_PER_EMAIL', 5),
   },
+  // Every request to /api (except the health check), per client address
+  apiRateLimit: {
+    windowMs: 15 * 60 * 1000,
+    perIp: positiveIntFromEnv('API_LIMIT_PER_IP', 600),
+  },
+  // New accounts per hour from one address, successful or not
+  registerRateLimit: {
+    windowMs: 60 * 60 * 1000,
+    perIp: positiveIntFromEnv('REGISTER_LIMIT_PER_IP', 10),
+  },
   allowSeedWipe: process.env.ALLOW_SEED_WIPE === 'true',
 };
