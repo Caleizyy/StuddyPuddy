@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { Preferences } from '@/lib/preferences';
 
 export type RegisterRequest = { name: string; email: string; password: string };
 export type RegisteredUser = { id: string; name: string; email: string; createdAt: string };
@@ -10,6 +11,7 @@ export type AuthUser = {
   role: UserRole;
   username: string | null;
   avatar: string | null;
+  preferences: Preferences;
 };
 export type LoginRequest = { email: string; password: string };
 

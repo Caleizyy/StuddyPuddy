@@ -75,3 +75,45 @@ export async function setAvatar(id: string, data: Buffer, contentType: string) {
 export async function clearAvatar(id: string) {
   await UserModel.updateOne({ _id: id }, { $unset: { avatar: '' } });
 }
+
+type PreferenceChanges = Partial<{
+  theme: string;
+  weekStart: string;
+  defaultPage: string;
+  compact: boolean;
+}>;
+
+export async function setPreferences(id: string, changes: PreferenceChanges) {
+  const set = Object.fromEntries(
+    Object.entries(changes).map(([key, value]) => [`preferences.${key}`, value]),
+  );
+  await UserModel.updateOne({ _id: id }, { $set: set });
+}
+
+export function findUserByIdWithHash(id: string) {
+  return UserModel.findById(id).select('+passwordHash');
+}
+
+// Saves a new password and signs out every other session by raising the token version.
+// Returns the new version so the caller can issue a fresh token for the current session.
+export async function replacePasswordHash(id: string, passwordHash: string) {
+  const user = await UserModel.findOneAndUpdate(
+    { _id: id },
+    { $set: { passwordHash }, $inc: { tokenVersion: 1 } },
+    { returnDocument: 'after' },
+  );
+  return user?.tokenVersion ?? null;
+}
+
+export async function raiseTokenVersion(id: string) {
+  const user = await UserModel.findOneAndUpdate(
+    { _id: id },
+    { $inc: { tokenVersion: 1 } },
+    { returnDocument: 'after' },
+  );
+  return user?.tokenVersion ?? null;
+}
+
+export async function deleteUser(id: string) {
+  await UserModel.deleteOne({ _id: id });
+}

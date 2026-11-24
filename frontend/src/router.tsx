@@ -4,6 +4,7 @@ import { AdminRoute } from '@/components/AdminRoute';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AdminPage } from '@/pages/AdminPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { SettingsPage } from '@/pages/SettingsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
           { path: '/tasks', element: <TasksPage /> },
           { path: '/plan', element: <PlanPage /> },
           { path: '/profile', element: <ProfilePage /> },
+          { path: '/settings', element: <SettingsPage /> },
           { path: '/availability', element: <AvailabilityPage /> },
           {
             element: <AdminRoute />,

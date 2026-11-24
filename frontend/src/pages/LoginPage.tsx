@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { DEFAULT_PREFERENCES, pathForDefaultPage } from '@/lib/preferences';
 
 // Where to go after logging in: the page the user was sent away from, or the dashboard
-function destinationFrom(state: unknown): string {
+function destinationFrom(state: unknown): string | null {
   const from = (state as { from?: unknown } | null)?.from;
   const isSafePath =
     typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && from !== '/login';
-  return isSafePath ? from : '/dashboard';
+  return isSafePath ? from : null;
 }
 
 const loginSchema = z.object({
@@ -27,9 +28,13 @@ type LoginForm = z.infer<typeof loginSchema>;
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, status } = useAuth();
+  const { login, status, user } = useAuth();
   const state = location.state as { from?: string; registered?: boolean } | null;
-  const destination = destinationFrom(location.state);
+  const requested = destinationFrom(location.state);
+  // Without a page to return to, open the page the user chose in their settings
+  const fallback = pathForDefaultPage(
+    user?.preferences.defaultPage ?? DEFAULT_PREFERENCES.defaultPage,
+  );
 
   const {
     register,
@@ -40,8 +45,10 @@ export function LoginPage() {
 
   async function onSubmit(values: LoginForm) {
     try {
-      await login(values.email, values.password);
-      void navigate(destination, { replace: true });
+      const loggedIn = await login(values.email, values.password);
+      void navigate(requested ?? pathForDefaultPage(loggedIn.preferences.defaultPage), {
+        replace: true,
+      });
     } catch (error) {
       setError('root', {
         message:
@@ -50,7 +57,7 @@ export function LoginPage() {
     }
   }
 
-  if (status === 'authenticated') return <Navigate to={destination} replace />;
+  if (status === 'authenticated') return <Navigate to={requested ?? fallback} replace />;
   return (
     <main className="mx-auto max-w-md p-8">
       <Card>

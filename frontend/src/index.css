@@ -43,6 +43,38 @@
   --priority-low: oklch(0.78 0.15 165);
 }
 
+/* The light theme replaces the dark values above. The page picks one with data-theme on <html>. */
+:root[data-theme='light'] {
+  --background: oklch(0.985 0.005 275);
+  --foreground: oklch(0.22 0.04 275);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.04 275);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.04 275);
+  --primary: oklch(0.52 0.21 285);
+  --primary-foreground: oklch(0.99 0.005 275);
+  --secondary: oklch(0.95 0.015 275);
+  --secondary-foreground: oklch(0.25 0.04 275);
+  --muted: oklch(0.96 0.01 275);
+  --muted-foreground: oklch(0.48 0.03 275);
+  --accent: oklch(0.93 0.025 275);
+  --accent-foreground: oklch(0.22 0.04 275);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.89 0.015 275);
+  --input: oklch(0.89 0.015 275);
+  --ring: oklch(0.55 0.14 215);
+
+  --chart-1: oklch(0.52 0.21 285);
+  --chart-2: oklch(0.55 0.13 215);
+  --chart-3: oklch(0.65 0.16 70);
+  --chart-4: oklch(0.55 0.2 340);
+  --chart-5: oklch(0.55 0.15 150);
+
+  --priority-high: oklch(0.55 0.22 25);
+  --priority-medium: oklch(0.62 0.16 70);
+  --priority-low: oklch(0.52 0.14 160);
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -90,6 +122,15 @@
 
   html {
     color-scheme: dark;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  /* Compact: everything is sized in rem, so a smaller root size tightens the whole app */
+  html[data-density='compact'] {
+    font-size: 14px;
   }
 
   body {
