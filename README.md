@@ -4,6 +4,8 @@ StuddyPuddy is a study planner. You enter your deadlines and how many hours you 
 
 Each user only ever sees their own tasks, hours and plan. There are two roles: `user` (everyone who registers) and `admin`, who can only see totals (accounts, open and finished tasks), never anyone's tasks or hours. Each user can also set a personal daily study limit that caps every day of their own plan.
 
+Also in the app: a landing page, a dashboard (today's focus, deadlines, a seven day study chart), a profile with a username and a profile picture, a settings page (light or dark theme, density, week start, page to open after login, change password, sign out other devices, download your data, delete your account), task filters (status, category, search, deadline window, sort), splitting a big task into topics, and time logging (the plan schedules only the hours you have left).
+
 ## Documents and checks (stage 3)
 
 - Architecture document (Lithuanian): [docs/architekturos-dokumentas.docx](docs/architekturos-dokumentas.docx)
@@ -124,7 +126,7 @@ The main quality attribute is correctness: the plan must follow the rules, and n
 npm run verify:correctness -w backend
 ```
 
-It checks 10 predefined scenarios (their expected plans were worked out by hand) and 1000 generated inputs from fixed seeds, so every run gives the same result. For each of them it checks eight rules, for example "no day exceeds the daily maximum (the user's hours, lowered by their daily limit)", "no task is studied after its deadline" and "scheduled plus unscheduled hours equal the estimate". The command exits with an error if anything fails. The same checks also run inside `npm test`.
+It checks 14 predefined scenarios (their expected plans were worked out by hand) and 1000 generated inputs from fixed seeds, so every run gives the same result. For each of them it checks nine rules, for example "no day exceeds the daily maximum (the user's hours, lowered by their daily limit)", "no task is studied after its deadline" and "scheduled plus unscheduled hours equal the hours left (the estimate minus the logged time)" and "logging time never makes a task more urgent". The command exits with an error if anything fails. The same checks also run inside `npm test`.
 
 The latest table is saved in `docs/verification-correctness.md`; add `-- --write` to the command to refresh it. The code is in `backend/src/verification/`, and the test file includes tests that feed each rule a deliberately wrong plan to prove the checks can fail.
 
@@ -147,7 +149,7 @@ npm test
 This runs the backend tests against an in-memory MongoDB, so no database setup is needed. The first run downloads a MongoDB binary, which needs internet access. The tests cover:
 
 - the planning core: priority scores, ordering, allocation, conflicts and invalid input
-- the plan, task and availability endpoints
+- the plan, task, availability, profile, settings and account endpoints, including task filters, topics and time logging
 - tenant isolation: one user cannot read, change or delete another user's tasks (`backend/src/routes/tasks.ownership.test.ts`), and plans are separate per user
 
 Coverage of the planning core: `npm run test:coverage`.
