@@ -1,4 +1,5 @@
 import { api } from './client';
+import { queryString, type TaskApiQuery } from '@/lib/taskFilters';
 import type { TaskCategory, TaskStatus } from '@/lib/taskOptions';
 
 export type Task = {
@@ -22,6 +23,8 @@ export const updateTask = (id: string, changes: TaskChanges) =>
 
 export const deleteTask = (id: string) => api.delete<void>(`/tasks/${id}`);
 
-export const listTasks = () => api.get<{ tasks: Task[] }>('/tasks');
+// total is every task the person has, so the page can show "3 of 12" while a filter is on
+export const listTasks = (query: TaskApiQuery = {}) =>
+  api.get<{ tasks: Task[]; total: number }>(`/tasks${queryString(query)}`);
 
 export const createTask = (data: NewTask) => api.post<{ task: Task }>('/tasks', data);

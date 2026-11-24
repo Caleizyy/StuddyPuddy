@@ -2,10 +2,12 @@ import {
   createTaskForUser,
   deleteTaskForUser,
   findTaskForUser,
-  listTasksForUser,
+  searchTasksForUser,
+  countTasksForUser,
   updateTaskForUser,
   type TaskRecord,
 } from '../repositories/task.repository.js';
+import type { TaskQuery } from '../schemas/taskQuery.schema.js';
 import type { CreateTaskInput, UpdateTaskInput } from '../schemas/task.schema.js';
 import { AppError } from '../utils/AppError.js';
 import { MAX_OPEN_TASKS } from '../core/validation.js';
@@ -37,9 +39,13 @@ function taskNotFound() {
   return new AppError(404, 'TASK_NOT_FOUND', 'Task not found');
 }
 
-export async function listTasks(userId: string) {
-  const tasks = await listTasksForUser(userId);
-  return tasks.map(toTaskDto);
+// total is every task the user has, so the page can say "3 of 12" when a filter is on
+export async function listTasks(userId: string, query: Partial<TaskQuery> = {}) {
+  const [tasks, total] = await Promise.all([
+    searchTasksForUser(userId, query),
+    countTasksForUser(userId),
+  ]);
+  return { tasks: tasks.map(toTaskDto), total };
 }
 
 export async function getTask(userId: string, taskId: string) {
