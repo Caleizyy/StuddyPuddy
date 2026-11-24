@@ -10,6 +10,7 @@ vi.mock('../repositories/user.repository.js', async (importOriginal) => {
     ...actual,
     findUserByEmailWithHash: vi.fn(),
     findUserById: vi.fn(),
+    findUserWithAvatar: vi.fn(),
     bumpTokenVersion: vi.fn(),
   };
 });
@@ -76,9 +77,12 @@ describe('protected routes', () => {
   it('returns the current user for a valid token', async () => {
     const token = await loginAndGetToken();
     vi.mocked(userRepository.findUserById).mockResolvedValue(storedUser as never);
+    vi.mocked(userRepository.findUserWithAvatar).mockResolvedValue(storedUser as never);
     const response = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
     expect(response.status).toBe(200);
     expect(response.body.user.email).toBe('ada@example.com');
+    expect(response.body.user.avatar).toBeNull();
+    expect(response.body.user.username).toBeNull();
   });
 
   it('rejects the old token after logout', async () => {

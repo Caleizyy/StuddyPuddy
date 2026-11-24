@@ -4,6 +4,13 @@ import { Schema, model, type InferSchemaType } from 'mongoose';
 export const USER_ROLES = ['user', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+// A small picture the user chose. Kept out of normal queries (select: false) because the user is
+// loaded on every request and the picture is only needed on the profile and on sign-in.
+const avatarSchema = new Schema(
+  { data: { type: Buffer, required: true }, contentType: { type: String, required: true } },
+  { _id: false },
+);
+
 const userSchema = new Schema(
   {
     email: { type: String, required: true, lowercase: true, trim: true },
@@ -11,6 +18,9 @@ const userSchema = new Schema(
     passwordHash: { type: String, required: true, select: false },
     tokenVersion: { type: Number, default: 0 },
     role: { type: String, enum: USER_ROLES, default: 'user' },
+    // A public handle chosen by the user: lowercase letters, digits and underscores. Optional.
+    username: { type: String, lowercase: true, trim: true },
+    avatar: { type: avatarSchema, select: false },
     // This client's own setting: never plan more than this many hours on one day. null means no limit.
     maxHoursPerDay: { type: Number, min: 0.25, max: 24, default: null },
   },
@@ -19,4 +29,9 @@ const userSchema = new Schema(
 
 export type User = InferSchemaType<typeof userSchema>;
 userSchema.index({ email: 1 }, { unique: true });
+// Usernames are unique, but most accounts have none yet, so only real values are indexed
+userSchema.index(
+  { username: 1 },
+  { unique: true, partialFilterExpression: { username: { $type: 'string' } } },
+);
 export const UserModel = model('User', userSchema);

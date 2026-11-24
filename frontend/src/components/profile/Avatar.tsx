@@ -1,0 +1,37 @@
+import { cn } from '@/lib/utils';
+
+type AvatarProps = {
+  name: string;
+  src?: string | null;
+  className?: string;
+};
+
+// First letters of up to two words: "Ada Lovelace" -> "AL"
+export function initialsOf(name: string): string {
+  const letters = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => Array.from(word)[0]?.toUpperCase() ?? '');
+  return letters.join('') || '?';
+}
+
+// The user's picture, or their initials on a coloured disc when they have none
+export function Avatar({ name, src, className }: AvatarProps) {
+  return (
+    <span
+      className={cn(
+        'inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary',
+        className,
+      )}
+    >
+      {src ? (
+        <img src={src} alt="" className="size-full object-cover" />
+      ) : (
+        <span aria-hidden>{initialsOf(name)}</span>
+      )}
+      <span className="sr-only">{name}</span>
+    </span>
+  );
+}

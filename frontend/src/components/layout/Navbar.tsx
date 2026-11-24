@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router';
 import { Menu, X } from 'lucide-react';
+import { Avatar } from '@/components/profile/Avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -80,11 +81,16 @@ export function Navbar() {
         {/* Wide screens: the links sit in the bar */}
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           <NavItems items={items} />
+          {isLoggedIn && user && (
+            <Link to="/profile" aria-label="Your profile" className="ml-2">
+              <Avatar name={user.name} src={user.avatar} />
+            </Link>
+          )}
           {isLoggedIn && (
             <Button
               variant="outline"
               size="sm"
-              className="ml-2"
+              className="ml-1"
               onClick={() => void handleLogout()}
             >
               Log out

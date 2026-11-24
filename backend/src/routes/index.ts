@@ -6,6 +6,7 @@ import availabilityRoutes from './availability.routes.js';
 import planRoutes from './plan.routes.js';
 import settingsRoutes from './settings.routes.js';
 import adminRoutes from './admin.routes.js';
+import profileRoutes from './profile.routes.js';
 
 const router = Router();
 router.use(healthRoutes);
@@ -15,4 +16,5 @@ router.use(availabilityRoutes);
 router.use(planRoutes);
 router.use(settingsRoutes);
 router.use(adminRoutes);
+router.use(profileRoutes);
 export default router;

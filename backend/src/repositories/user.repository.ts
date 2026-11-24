@@ -1,6 +1,7 @@
 import { UserModel } from '../models/user.js';
 
 export class DuplicateEmailError extends Error {}
+export class DuplicateUsernameError extends Error {}
 
 type NewUser = { name: string; email: string; passwordHash: string };
 
@@ -21,7 +22,7 @@ export const createUser = (data: NewUser) => insertUser(data);
 export const createAdminUser = (data: NewUser) => insertUser(data, 'admin');
 
 export function findUserByEmailWithHash(email: string) {
-  return UserModel.findOne({ email }).select('+passwordHash');
+  return UserModel.findOne({ email }).select('+passwordHash +avatar');
 }
 
 export function findUserById(id: string) {
@@ -39,4 +40,38 @@ export function countAllUsers() {
 
 export async function bumpTokenVersion(id: string) {
   await UserModel.updateOne({ _id: id }, { $inc: { tokenVersion: 1 } });
+}
+
+// The user with the picture, for the profile and for "who am I". Other lookups skip the picture.
+export function findUserWithAvatar(id: string) {
+  return UserModel.findById(id).select('+avatar');
+}
+
+export async function updateProfileFields(
+  id: string,
+  fields: { name?: string; username?: string | null },
+) {
+  const set: { name?: string; username?: string } = {};
+  if (fields.name !== undefined) set.name = fields.name;
+  if (typeof fields.username === 'string') set.username = fields.username;
+  const update = {
+    ...(Object.keys(set).length > 0 && { $set: set }),
+    ...(fields.username === null && { $unset: { username: '' } }),
+  };
+  try {
+    await UserModel.updateOne({ _id: id }, update, { runValidators: true });
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 11000) {
+      throw new DuplicateUsernameError('Username already taken');
+    }
+    throw error;
+  }
+}
+
+export async function setAvatar(id: string, data: Buffer, contentType: string) {
+  await UserModel.updateOne({ _id: id }, { $set: { avatar: { data, contentType } } });
+}
+
+export async function clearAvatar(id: string) {
+  await UserModel.updateOne({ _id: id }, { $unset: { avatar: '' } });
 }
