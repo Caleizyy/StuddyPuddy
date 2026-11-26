@@ -77,7 +77,7 @@ export function SettingsPage() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
-      <h1 className="text-3xl font-extrabold">Settings</h1>
+      <h1 className="text-3xl font-semibold">Settings</h1>
 
       {problem && (
         <p role="alert" className="text-sm text-destructive">

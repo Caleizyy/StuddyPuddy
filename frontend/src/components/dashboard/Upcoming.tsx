@@ -46,9 +46,9 @@ export function Upcoming({ tasks }: { tasks: Task[] }) {
                       <span className="font-semibold">{task.title}</span>
                       <span
                         className={cn(
-                          'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold',
+                          'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
                           deadline.overdue
-                            ? 'bg-destructive text-white'
+                            ? 'bg-destructive/10 text-destructive'
                             : 'bg-secondary text-secondary-foreground',
                         )}
                       >

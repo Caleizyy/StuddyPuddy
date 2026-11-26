@@ -19,22 +19,19 @@ function hoursSummary(item: PlanItem): string {
 
 export function PriorityList({ items }: { items: PlanItem[] }) {
   return (
-    <ol className="space-y-3">
+    <ol className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
       {items.map((item, index) => {
         const deadline = describeDeadline(item.deadline);
         const total = item.scheduledHours + item.unscheduledHours;
         return (
-          <li
-            key={item.taskId}
-            className="flex overflow-hidden rounded-2xl border border-border bg-card"
-          >
-            <span aria-hidden className={cn('w-2.5 shrink-0', BAND_STRIPE[item.band])} />
-            <span className="flex w-12 shrink-0 items-center justify-center font-heading text-2xl font-extrabold text-muted-foreground sm:w-14">
+          <li key={item.taskId} className="flex">
+            <span aria-hidden className={cn('w-1 shrink-0', BAND_STRIPE[item.band])} />
+            <span className="flex w-12 shrink-0 items-center justify-center text-lg font-medium text-muted-foreground tabular-nums sm:w-14">
               {index + 1}
             </span>
             <div className="min-w-0 flex-1 py-4 pr-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <h3 className="font-heading text-lg leading-tight font-bold">{item.title}</h3>
+                <h3 className="font-heading text-lg leading-tight font-semibold">{item.title}</h3>
                 <div className="flex flex-wrap items-center gap-2">
                   <PriorityBadge band={item.band} />
                   {item.atRisk && <Badge variant="destructive">At risk</Badge>}
@@ -42,7 +39,7 @@ export function PriorityList({ items }: { items: PlanItem[] }) {
               </div>
               <p
                 className={cn(
-                  'mt-1 text-sm font-semibold',
+                  'mt-1 text-sm font-medium',
                   deadline.overdue ? 'text-destructive' : 'text-muted-foreground',
                 )}
               >

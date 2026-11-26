@@ -15,7 +15,7 @@ export function StatTile({ label, value, hint, tone = 'normal' }: StatTileProps)
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p
         className={cn(
-          'font-heading text-3xl font-extrabold tabular-nums',
+          'font-heading text-3xl font-semibold tabular-nums',
           tone === 'warning' && 'text-destructive',
         )}
       >

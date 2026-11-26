@@ -18,15 +18,15 @@ export function DaySchedule({ plan }: { plan: Plan }) {
             <section
               key={day.date}
               className={cn(
-                'rounded-2xl bg-card p-4',
-                isToday ? 'sticker' : 'border border-border',
+                'rounded-xl bg-card p-4',
+                isToday ? 'border border-primary ring-1 ring-primary' : 'border border-border',
                 day.entries.length === 0 && 'bg-transparent',
               )}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <h3 className="font-heading text-lg font-bold">{dayLabel(day.date, today)}</h3>
+                <h3 className="font-heading text-lg font-semibold">{dayLabel(day.date, today)}</h3>
                 {day.entries.length > 0 && (
-                  <span className="rounded-full bg-accent px-2.5 py-0.5 text-sm font-bold text-accent-foreground">
+                  <span className="text-sm font-medium text-muted-foreground tabular-nums">
                     {day.totalHours} h
                   </span>
                 )}
@@ -43,13 +43,13 @@ export function DaySchedule({ plan }: { plan: Plan }) {
                         <span
                           aria-hidden
                           className={cn(
-                            'h-8 w-1.5 shrink-0 rounded-full',
+                            'h-8 w-1 shrink-0 rounded-full',
                             item ? BAND_STRIPE[item.band] : 'bg-muted',
                           )}
                         />
                         <span className="min-w-0 flex-1 font-medium">{entry.title}</span>
                         {item?.atRisk && <Badge variant="destructive">At risk</Badge>}
-                        <span className="font-heading font-bold tabular-nums">{entry.hours} h</span>
+                        <span className="font-medium tabular-nums">{entry.hours} h</span>
                       </li>
                     );
                   })}

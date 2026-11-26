@@ -1,5 +1,4 @@
 import { Link } from 'react-router';
-import { Ripple } from '@/components/layout/Logo';
 import { buttonVariants } from '@/components/ui/button';
 
 const STEPS = [
@@ -27,20 +26,17 @@ const STEPS = [
 export function GettingStarted() {
   return (
     <section aria-label="Getting started" className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Ripple className="size-12 text-foreground" />
-        <h2 className="text-2xl font-extrabold">Three steps and you have a plan</h2>
-      </div>
+      <h2 className="text-2xl font-semibold">Three steps and you have a plan</h2>
       <ol className="grid gap-4 md:grid-cols-3">
         {STEPS.map((step, index) => (
           <li
             key={step.title}
             className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5"
           >
-            <span className="flex size-10 items-center justify-center rounded-full bg-accent font-heading text-xl font-extrabold text-accent-foreground">
+            <span className="flex size-8 items-center justify-center rounded-full bg-primary font-heading text-base font-semibold text-primary-foreground">
               {index + 1}
             </span>
-            <p className="font-heading text-lg font-bold">{step.title}</p>
+            <p className="font-heading text-lg font-semibold">{step.title}</p>
             <p className="flex-1 text-muted-foreground">{step.text}</p>
             <Link
               to={step.to}

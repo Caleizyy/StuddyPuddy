@@ -24,7 +24,7 @@ export function Ripple({ className }: { className?: string }) {
       />
       <path
         d="M24 6c4.5 6.2 7 10 7 14a7 7 0 1 1-14 0c0-4 2.5-7.800 7-14Z"
-        fill="var(--accent)"
+        fill="var(--primary)"
         stroke="currentColor"
         strokeWidth="3"
         strokeLinejoin="round"
@@ -37,7 +37,7 @@ export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn('inline-flex items-center gap-2 text-foreground', className)}>
       <Ripple className="size-8" />
-      <span className="font-heading text-xl font-extrabold tracking-tight">StuddyPuddy</span>
+      <span className="font-heading text-xl font-semibold tracking-tight">StuddyPuddy</span>
     </span>
   );
 }

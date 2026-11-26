@@ -60,7 +60,7 @@ export function TaskCard({
           <div className="min-w-0">
             <h3
               className={cn(
-                'font-heading text-xl leading-tight font-bold',
+                'font-heading text-xl leading-tight font-semibold',
                 isDone && 'line-through',
               )}
             >
@@ -86,9 +86,9 @@ export function TaskCard({
             {!isDone && (
               <span
                 className={cn(
-                  'ml-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
+                  'ml-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
                   deadline.overdue
-                    ? 'bg-destructive text-white'
+                    ? 'bg-destructive/10 text-destructive'
                     : 'bg-secondary text-secondary-foreground',
                 )}
               >
@@ -134,34 +134,29 @@ export function TaskCard({
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {isDone ? (
-            <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
+            <Button variant="outline" size="default" disabled={busy} onClick={onToggleDone}>
               <RotateCcw />
               Reopen
             </Button>
           ) : (
             <>
-              <Button size="sm" onClick={onLogTime}>
+              <Button size="default" onClick={onLogTime}>
                 <Timer />
                 Log time
               </Button>
-              <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
+              <Button variant="outline" size="default" disabled={busy} onClick={onToggleDone}>
                 <Check />
                 Mark done
               </Button>
             </>
           )}
           <span className="ml-auto flex items-center">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={`Edit ${task.title}`}
-              onClick={onEdit}
-            >
+            <Button variant="ghost" size="icon" aria-label={`Edit ${task.title}`} onClick={onEdit}>
               <Pencil />
             </Button>
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               aria-label={`Delete ${task.title}`}
               onClick={onDelete}
             >

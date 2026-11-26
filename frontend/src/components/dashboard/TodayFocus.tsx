@@ -1,7 +1,6 @@
 import { Timer } from 'lucide-react';
 import { Link } from 'react-router';
 import type { Plan } from '@/api/plan';
-import { Ripple } from '@/components/layout/Logo';
 import { todaysFocus } from '@/lib/dashboard';
 
 type Props = {
@@ -18,24 +17,19 @@ export function TodayFocus({ plan, greeting, dateText, onLogTime }: Props) {
   const noHours = !noTasks && plan.schedule.length === 0;
 
   return (
-    <section
-      aria-label="Today"
-      className="sticker relative overflow-hidden rounded-3xl bg-hero p-6 text-hero-foreground md:p-8"
-    >
-      <Ripple className="pointer-events-none absolute -right-10 -bottom-12 size-72 text-white opacity-10" />
-
-      <div className="relative grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10">
+    <section aria-label="Today" className="rounded-2xl border border-border bg-card p-6 md:p-8">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10">
         <div className="flex flex-col justify-between gap-6">
           <div>
-            <h1 className="text-3xl leading-tight font-extrabold md:text-4xl">{greeting}</h1>
-            <p className="mt-1 text-hero-foreground/80">{dateText}</p>
+            <h1 className="text-3xl leading-tight font-semibold">{greeting}</h1>
+            <p className="mt-1 text-muted-foreground">{dateText}</p>
           </div>
           <div>
-            <p className="font-heading text-7xl leading-none font-extrabold tabular-nums">
+            <p className="font-heading text-6xl leading-none font-semibold tabular-nums">
               {hours}
-              <span className="ml-1 text-3xl font-bold">h</span>
+              <span className="ml-1 text-2xl font-medium text-muted-foreground">h</span>
             </p>
-            <p className="mt-2 text-lg font-medium">
+            <p className="mt-2 text-base text-muted-foreground">
               {hours === 0
                 ? 'planned for today'
                 : entries.length === 1
@@ -47,8 +41,8 @@ export function TodayFocus({ plan, greeting, dateText, onLogTime }: Props) {
 
         <div>
           {entries.length === 0 ? (
-            <div className="flex h-full flex-col justify-center gap-3 rounded-2xl bg-white/10 p-5">
-              <p className="text-lg font-semibold">
+            <div className="flex h-full flex-col justify-center gap-3 rounded-xl bg-muted p-5">
+              <p className="font-medium">
                 {noTasks
                   ? 'Nothing to study. You have no unfinished tasks.'
                   : noHours
@@ -57,31 +51,28 @@ export function TodayFocus({ plan, greeting, dateText, onLogTime }: Props) {
               </p>
               <Link
                 to={noTasks ? '/tasks' : noHours ? '/availability' : '/plan'}
-                className="w-fit rounded-xl bg-white px-4 py-2 text-sm font-bold text-[oklch(0.25_0.08_265)]"
+                className="inline-flex min-h-11 w-fit items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
               >
                 {noTasks ? 'Add a task' : noHours ? 'Set your hours' : 'See the plan'}
               </Link>
             </div>
           ) : (
-            <ul className="space-y-2.5">
+            <ul className="divide-y divide-border rounded-xl border border-border">
               {entries.map((entry) => (
-                <li
-                  key={entry.taskId}
-                  className="flex items-center gap-3 rounded-2xl bg-white/12 p-3 pl-4 backdrop-blur-sm"
-                >
-                  <span className="font-heading text-2xl font-extrabold tabular-nums">
+                <li key={entry.taskId} className="flex items-center gap-3 p-3 pl-4">
+                  <span className="font-heading text-xl font-semibold tabular-nums">
                     {entry.hours}
-                    <span className="text-base font-bold"> h</span>
+                    <span className="text-sm font-medium text-muted-foreground"> h</span>
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{entry.title}</p>
+                    <p className="truncate font-medium">{entry.title}</p>
                     {entry.item?.nextStep ? (
-                      <p className="truncate text-sm text-hero-foreground/80">
+                      <p className="truncate text-sm text-muted-foreground">
                         Start with: {entry.item.nextStep}
                       </p>
                     ) : (
                       entry.item?.atRisk && (
-                        <p className="text-sm font-semibold text-[oklch(0.9_0.17_95)]">
+                        <p className="text-sm font-medium text-priority-medium">
                           Running late, start here first
                         </p>
                       )
@@ -90,7 +81,7 @@ export function TodayFocus({ plan, greeting, dateText, onLogTime }: Props) {
                   <button
                     type="button"
                     onClick={() => onLogTime(entry.taskId)}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-sm font-bold text-[oklch(0.25_0.08_265)] transition-transform hover:-translate-y-px"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-primary hover:bg-muted"
                   >
                     <Timer className="size-4" aria-hidden />
                     Log time

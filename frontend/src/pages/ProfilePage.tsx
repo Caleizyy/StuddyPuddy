@@ -136,7 +136,7 @@ export function ProfilePage() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
-      <h1 className="text-3xl font-extrabold">Profile</h1>
+      <h1 className="text-3xl font-semibold">Profile</h1>
 
       <Card>
         <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">

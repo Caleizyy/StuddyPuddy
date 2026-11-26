@@ -33,13 +33,13 @@ export function StudyChart({ tasks }: { tasks: Task[] }) {
                 key={day.date}
                 className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
               >
-                <span className="text-xs font-bold tabular-nums">
+                <span className="text-xs font-medium tabular-nums">
                   {day.hours > 0 ? day.hours : ''}
                 </span>
                 <div
                   className={cn(
                     'w-full rounded-t-xl',
-                    day.date === todayKey ? 'bg-accent' : 'bg-primary',
+                    day.date === todayKey ? 'bg-primary' : 'bg-primary/35',
                   )}
                   style={{
                     height: `${(day.hours / most) * 70}%`,
@@ -50,7 +50,7 @@ export function StudyChart({ tasks }: { tasks: Task[] }) {
                 <span
                   className={cn(
                     'text-xs font-medium text-muted-foreground',
-                    day.date === todayKey && 'font-bold text-foreground',
+                    day.date === todayKey && 'font-semibold text-foreground',
                   )}
                 >
                   {SHORT_DAY.format(new Date(`${day.date}T00:00:00Z`))}

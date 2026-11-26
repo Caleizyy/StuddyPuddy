@@ -172,7 +172,7 @@ export function TasksPage() {
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold">Tasks</h1>
+          <h1 className="text-3xl font-semibold">Tasks</h1>
           {loadState === 'ready' && tasks.length > 0 && (
             <p className="text-muted-foreground">
               {filtered && `Showing ${tasks.length} of ${total} · `}

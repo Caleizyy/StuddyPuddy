@@ -1,8 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
-import '@fontsource-variable/figtree';
-import '@fontsource-variable/bricolage-grotesque';
 import './index.css';
 import { router } from './router';
 import { AuthProvider } from './components/AuthProvider';

@@ -45,9 +45,9 @@ export function RegisterPage() {
   }
   return (
     <main className="mx-auto max-w-md px-4 py-10 sm:py-16">
-      <Card className="sticker rounded-3xl p-2">
+      <Card className="rounded-2xl p-2 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-extrabold">Create your account</CardTitle>
+          <CardTitle className="text-2xl font-semibold">Create your account</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">

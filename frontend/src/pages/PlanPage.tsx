@@ -49,14 +49,14 @@ function PlanContent({ plan }: { plan: Plan }) {
       )}
 
       <section aria-labelledby="priorities">
-        <h2 id="priorities" className="mb-3 text-xl font-bold">
+        <h2 id="priorities" className="mb-3 text-xl font-semibold">
           Priorities
         </h2>
         <PriorityList items={plan.items} />
       </section>
 
       <section aria-labelledby="day-by-day">
-        <h2 id="day-by-day" className="mb-3 text-xl font-bold">
+        <h2 id="day-by-day" className="mb-3 text-xl font-semibold">
           Day by day
         </h2>
         <DaySchedule plan={plan} />
@@ -71,7 +71,7 @@ export function PlanPage() {
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 md:py-8">
       <div>
-        <h1 className="text-3xl font-extrabold">Your plan</h1>
+        <h1 className="text-3xl font-semibold">Your plan</h1>
         <p className="mt-1 text-muted-foreground">
           What to study and when, ranked by priority. It updates whenever you change a task or your
           hours.

@@ -37,17 +37,17 @@ const adminLink: NavItem = { to: '/admin', label: 'Usage', icon: ShieldCheck };
 
 function topLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
-    'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+    'flex items-center gap-2 rounded-lg px-3 min-h-11 text-sm font-medium transition-colors',
     isActive
-      ? 'bg-foreground text-background'
+      ? 'bg-secondary text-foreground'
       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
   );
 }
 
 function tabClass({ isActive }: { isActive: boolean }) {
   return cn(
-    'flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[0.7rem] font-semibold transition-colors',
-    isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+    'flex flex-1 flex-col items-center gap-0.5 min-h-12 justify-center text-[0.7rem] font-medium transition-colors',
+    isActive ? 'text-primary' : 'text-muted-foreground',
   );
 }
 
@@ -183,8 +183,8 @@ export function Navbar() {
               aria-controls="more-menu"
               onClick={() => setMoreOpen((open) => !open)}
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[0.7rem] font-semibold',
-                moreOpen ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                'flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 text-[0.7rem] font-medium',
+                moreOpen ? 'text-primary' : 'text-muted-foreground',
               )}
             >
               <MoreHorizontal className="size-5" aria-hidden />
