@@ -59,10 +59,10 @@ export function LoginPage() {
 
   if (status === 'authenticated') return <Navigate to={requested ?? fallback} replace />;
   return (
-    <main className="mx-auto max-w-md p-8">
-      <Card>
+    <main className="mx-auto max-w-md px-4 py-10 sm:py-16">
+      <Card className="sticker rounded-3xl p-2">
         <CardHeader>
-          <CardTitle>Log in</CardTitle>
+          <CardTitle className="text-2xl font-extrabold">Welcome back</CardTitle>
         </CardHeader>
         <CardContent>
           {state?.registered && (
@@ -100,7 +100,7 @@ export function LoginPage() {
           </form>
           <p className="mt-4 text-sm text-muted-foreground">
             No account yet?{' '}
-            <Link to="/register" className="text-primary underline">
+            <Link to="/register" className="font-semibold text-primary hover:underline">
               Register
             </Link>
           </p>

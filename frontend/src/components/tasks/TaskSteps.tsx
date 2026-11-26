@@ -55,7 +55,7 @@ export function TaskSteps({ task, busy, onSplit, onToggle, onEdit }: TaskStepsPr
               disabled={busy}
               aria-pressed={step.done}
               onClick={() => onToggle(step)}
-              className="flex w-full items-center gap-2 rounded-md px-1 py-1 text-left text-sm hover:bg-accent/50 disabled:opacity-60"
+              className="flex w-full items-center gap-2 rounded-md px-1 py-1 text-left text-sm hover:bg-muted disabled:opacity-60"
             >
               {step.done ? (
                 <Check className="size-4 text-primary" aria-hidden />

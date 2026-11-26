@@ -33,19 +33,19 @@ export function AvailabilityPage() {
   }, [load]);
 
   return (
-    <main className="mx-auto max-w-xl space-y-6 p-8">
+    <main className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
       <div>
-        <h1 className="text-2xl font-semibold">Availability</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          How many hours can you study on each day of a typical week? The planner never schedules
-          more than this on a day.
+        <h1 className="text-3xl font-extrabold">Study hours</h1>
+        <p className="mt-1 text-muted-foreground">
+          How many hours can you study on each day of a typical week? The plan never schedules more
+          than this on a day.
         </p>
       </div>
 
       {state.status === 'loading' && <LoadingState />}
       {state.status === 'error' && (
         <ErrorState
-          title="We could not load your availability"
+          title="We could not load your study hours"
           message="Your hours are safe. Check your connection and try again."
           onRetry={load}
         />

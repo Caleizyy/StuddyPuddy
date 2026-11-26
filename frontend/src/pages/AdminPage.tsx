@@ -27,9 +27,9 @@ export function AdminPage() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-8">
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
       <div>
-        <h1 className="text-2xl font-semibold">Usage</h1>
+        <h1 className="text-3xl font-extrabold">Usage</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Totals across all accounts. This page shows counts only, never anyone&apos;s tasks, hours
           or personal details.

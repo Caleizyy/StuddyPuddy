@@ -51,14 +51,14 @@ export function DashboardPage() {
 
   if (tasksState.status === 'loading') {
     return (
-      <main className="mx-auto max-w-4xl p-8">
+      <main className="mx-auto max-w-6xl p-8">
         <LoadingState label="Loading your dashboard..." />
       </main>
     );
   }
   if (tasksState.status === 'error') {
     return (
-      <main className="mx-auto max-w-4xl p-8">
+      <main className="mx-auto max-w-6xl p-8">
         <ErrorState
           title="We could not load your dashboard"
           message="Your tasks are safe. Check your connection and try again."
@@ -69,17 +69,42 @@ export function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-8">
-      <div>
-        <h1 className="text-2xl font-semibold">{hello}</h1>
-        <p className="mt-1 text-muted-foreground">{today}</p>
-      </div>
-
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
       {tasks.length === 0 ? (
-        <GettingStarted />
+        <>
+          <div>
+            <h1 className="text-3xl font-extrabold">{hello}</h1>
+            <p className="mt-1 text-muted-foreground">{today}</p>
+          </div>
+          <GettingStarted />
+        </>
       ) : (
         <>
-          <section aria-label="Summary" className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {planState.status === 'ready' && (
+            <TodayFocus
+              plan={planState.plan}
+              greeting={hello}
+              dateText={today}
+              onLogTime={(taskId) =>
+                setLoggingFor(tasks.find((task) => task.id === taskId) ?? null)
+              }
+            />
+          )}
+          {planState.status === 'loading' && <LoadingState label="Building today's plan..." />}
+          {planState.status === 'error' && (
+            <ErrorState
+              title="We could not load your plan"
+              message={planState.message}
+              onRetry={reloadPlan}
+            />
+          )}
+
+          {planState.status === 'ready' && <PlanWarnings plan={planState.plan} />}
+
+          <section
+            aria-label="Summary"
+            className="grid grid-cols-2 gap-y-1 rounded-2xl border border-border bg-card px-2 py-2 md:grid-cols-4 md:divide-x md:divide-border"
+          >
             <StatTile label="Open tasks" value={stats.open} />
             <StatTile label="Hours left" value={`${stats.hoursLeft} h`} hint="after time logged" />
             <StatTile
@@ -91,27 +116,10 @@ export function DashboardPage() {
             <StatTile label="Studied this week" value={`${stats.studiedThisWeek} h`} />
           </section>
 
-          {planState.status === 'ready' && <PlanWarnings plan={planState.plan} />}
-          {planState.status === 'error' && (
-            <ErrorState
-              title="We could not load your plan"
-              message={planState.message}
-              onRetry={reloadPlan}
-            />
-          )}
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {planState.status === 'ready' && (
-              <TodayFocus
-                plan={planState.plan}
-                onLogTime={(taskId) =>
-                  setLoggingFor(tasks.find((task) => task.id === taskId) ?? null)
-                }
-              />
-            )}
+          <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
             <Upcoming tasks={tasks} />
+            <StudyChart tasks={tasks} />
           </div>
-          <StudyChart tasks={tasks} />
         </>
       )}
 

@@ -1,33 +1,23 @@
-import { BookOpen, Check, Clock, Pencil, RotateCcw, Timer, Trash2 } from 'lucide-react';
+import {
+  BookOpen,
+  CalendarDays,
+  Check,
+  Clock,
+  Pencil,
+  RotateCcw,
+  Timer,
+  Trash2,
+} from 'lucide-react';
 import type { Task, TaskStep } from '@/api/tasks';
 import { TaskSteps } from '@/components/tasks/TaskSteps';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { describeDeadline, formatDeadline } from '@/lib/deadline';
-import {
-  CATEGORY_LABELS,
-  STATUS_LABELS,
-  type TaskCategory,
-  type TaskStatus,
-} from '@/lib/taskOptions';
+import { CATEGORY_LABELS, CATEGORY_STRIPE, STATUS_LABELS } from '@/lib/taskOptions';
 import { cn } from '@/lib/utils';
 import type { PlanItem } from '@/api/plan';
 import { PriorityBadge } from '@/components/plan/PriorityBadge';
-import { formatScore } from '@/lib/priority';
 import { loggedPercent } from '@/lib/timeLog';
-
-const CATEGORY_DOT: Record<TaskCategory, string> = {
-  homework: 'bg-chart-1',
-  exam: 'bg-chart-4',
-  quiz: 'bg-chart-3',
-  lab: 'bg-chart-2',
-};
-
-const STATUS_BADGE: Record<TaskStatus, 'outline' | 'secondary' | 'default'> = {
-  todo: 'outline',
-  in_progress: 'secondary',
-  done: 'default',
-};
 
 type TaskCardProps = {
   task: Task;
@@ -58,85 +48,127 @@ export function TaskCard({
   const deadline = describeDeadline(task.deadline);
 
   return (
-    <li className={cn('rounded-xl bg-card p-4 ring-1 ring-foreground/10', isDone && 'opacity-70')}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <h3 className={cn('font-medium', isDone && 'line-through')}>{task.title}</h3>
-        <Badge variant={STATUS_BADGE[task.status]}>{STATUS_LABELS[task.status]}</Badge>
-      </div>
+    <li
+      className={cn(
+        'flex overflow-hidden rounded-2xl border border-border bg-card',
+        isDone && 'opacity-60',
+      )}
+    >
+      <span aria-hidden className={cn('w-2.5 shrink-0', CATEGORY_STRIPE[task.category])} />
+      <div className="min-w-0 flex-1 p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3
+              className={cn(
+                'font-heading text-xl leading-tight font-bold',
+                isDone && 'line-through',
+              )}
+            >
+              {task.title}
+            </h3>
+            <p className="mt-0.5 text-sm font-semibold text-muted-foreground">
+              {CATEGORY_LABELS[task.category]}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {!isDone && priority && <PriorityBadge band={priority.band} />}
+            {!isDone && priority?.atRisk && <Badge variant="destructive">At risk</Badge>}
+            {task.status !== 'todo' && (
+              <Badge variant={isDone ? 'default' : 'secondary'}>{STATUS_LABELS[task.status]}</Badge>
+            )}
+          </div>
+        </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className={cn('size-2 rounded-full', CATEGORY_DOT[task.category])} aria-hidden />
-          {CATEGORY_LABELS[task.category]}
-        </span>
-        <span>Due {formatDeadline(task.deadline)}</span>
-        {!isDone && (
-          <Badge variant={deadline.overdue ? 'destructive' : 'outline'}>{deadline.label}</Badge>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <CalendarDays className="size-4" aria-hidden />
+            Due {formatDeadline(task.deadline)}
+            {!isDone && (
+              <span
+                className={cn(
+                  'ml-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
+                  deadline.overdue
+                    ? 'bg-destructive text-white'
+                    : 'bg-secondary text-secondary-foreground',
+                )}
+              >
+                {deadline.label}
+              </span>
+            )}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="size-4" aria-hidden />
+            {task.loggedHours > 0
+              ? `${task.loggedHours} of ${task.estimatedHours} h studied`
+              : `${task.estimatedHours} h estimated`}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <BookOpen className="size-4" aria-hidden />
+            {task.moduleCount} {task.moduleCount === 1 ? 'module' : 'modules'}
+          </span>
+        </div>
+
+        {task.loggedHours > 0 && (
+          <div
+            role="progressbar"
+            aria-label="Time studied"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={loggedPercent(task)}
+            className="mt-3 h-2 overflow-hidden rounded-full bg-muted"
+          >
+            <div
+              className="h-full rounded-full bg-primary"
+              style={{ width: `${loggedPercent(task)}%` }}
+            />
+          </div>
         )}
-      </div>
 
-      {!isDone && priority && (
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-          <PriorityBadge band={priority.band} />
-          <span className="text-muted-foreground">score {formatScore(priority.priorityScore)}</span>
-          {priority.atRisk && <Badge variant="destructive">At risk</Badge>}
+        <TaskSteps
+          task={task}
+          busy={busy}
+          onSplit={onSplit}
+          onToggle={onToggleStep}
+          onEdit={onEditSteps}
+        />
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {isDone ? (
+            <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
+              <RotateCcw />
+              Reopen
+            </Button>
+          ) : (
+            <>
+              <Button size="sm" onClick={onLogTime}>
+                <Timer />
+                Log time
+              </Button>
+              <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
+                <Check />
+                Mark done
+              </Button>
+            </>
+          )}
+          <span className="ml-auto flex items-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Edit ${task.title}`}
+              onClick={onEdit}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Delete ${task.title}`}
+              onClick={onDelete}
+            >
+              <Trash2 />
+            </Button>
+          </span>
         </div>
-      )}
-
-      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <Clock className="size-4" aria-hidden />
-          {task.loggedHours > 0
-            ? `${task.loggedHours} of ${task.estimatedHours} h studied`
-            : `${task.estimatedHours} h estimated`}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <BookOpen className="size-4" aria-hidden />
-          {task.moduleCount} {task.moduleCount === 1 ? 'module' : 'modules'}
-        </span>
-      </div>
-
-      {task.loggedHours > 0 && (
-        <div
-          role="progressbar"
-          aria-label="Time studied"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={loggedPercent(task)}
-          className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
-        >
-          <div className="h-full bg-chart-2" style={{ width: `${loggedPercent(task)}%` }} />
-        </div>
-      )}
-
-      <TaskSteps
-        task={task}
-        busy={busy}
-        onSplit={onSplit}
-        onToggle={onToggleStep}
-        onEdit={onEditSteps}
-      />
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" disabled={busy} onClick={onToggleDone}>
-          {isDone ? <RotateCcw /> : <Check />}
-          {isDone ? 'Reopen' : 'Mark done'}
-        </Button>
-        <Button variant="outline" size="sm" onClick={onLogTime}>
-          <Timer />
-          Log time
-        </Button>
-        <Button variant="ghost" size="icon-sm" aria-label={`Edit ${task.title}`} onClick={onEdit}>
-          <Pencil />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={`Delete ${task.title}`}
-          onClick={onDelete}
-        >
-          <Trash2 />
-        </Button>
       </div>
     </li>
   );

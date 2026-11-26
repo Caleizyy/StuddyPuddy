@@ -11,68 +11,91 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.875rem;
 
-  --background: oklch(0.17 0.03 275);
-  --foreground: oklch(0.96 0.01 275);
-  --card: oklch(0.21 0.035 275);
-  --card-foreground: oklch(0.96 0.01 275);
-  --popover: oklch(0.21 0.035 275);
-  --popover-foreground: oklch(0.96 0.01 275);
-  --primary: oklch(0.7 0.19 285);
-  --primary-foreground: oklch(0.15 0.03 275);
-  --secondary: oklch(0.26 0.04 275);
-  --secondary-foreground: oklch(0.94 0.01 275);
-  --muted: oklch(0.24 0.035 275);
-  --muted-foreground: oklch(0.72 0.03 275);
-  --accent: oklch(0.29 0.05 275);
-  --accent-foreground: oklch(0.96 0.01 275);
-  --destructive: oklch(0.65 0.22 20);
-  --border: oklch(0.32 0.04 275);
-  --input: oklch(0.32 0.04 275);
-  --ring: oklch(0.78 0.12 195);
+  /* Dark: a rainy night. Deep navy surfaces, a periwinkle primary and one sunny accent. */
+  --background: oklch(0.19 0.05 265);
+  --foreground: oklch(0.96 0.015 250);
+  --card: oklch(0.245 0.06 265);
+  --card-foreground: oklch(0.96 0.015 250);
+  --popover: oklch(0.26 0.06 265);
+  --popover-foreground: oklch(0.96 0.015 250);
+  --primary: oklch(0.74 0.15 265);
+  --primary-foreground: oklch(0.2 0.06 265);
+  --secondary: oklch(0.3 0.07 265);
+  --secondary-foreground: oklch(0.95 0.015 250);
+  --muted: oklch(0.28 0.06 265);
+  --muted-foreground: oklch(0.76 0.04 255);
+  --accent: oklch(0.85 0.16 92);
+  --accent-foreground: oklch(0.24 0.06 265);
+  --destructive: oklch(0.72 0.19 25);
+  --border: oklch(0.36 0.06 265);
+  --input: oklch(0.4 0.06 265);
+  --ring: oklch(0.85 0.16 92);
 
-  --chart-1: oklch(0.7 0.19 285);
-  --chart-2: oklch(0.78 0.12 195);
-  --chart-3: oklch(0.8 0.16 80);
-  --chart-4: oklch(0.72 0.19 340);
-  --chart-5: oklch(0.78 0.15 150);
+  --chart-1: oklch(0.74 0.15 265);
+  --chart-2: oklch(0.82 0.13 195);
+  --chart-3: oklch(0.85 0.16 92);
+  --chart-4: oklch(0.75 0.17 350);
+  --chart-5: oklch(0.8 0.16 155);
 
-  --priority-high: oklch(0.68 0.21 20);
-  --priority-medium: oklch(0.8 0.16 80);
-  --priority-low: oklch(0.78 0.15 165);
+  --priority-high: oklch(0.72 0.19 25);
+  --priority-medium: oklch(0.85 0.16 92);
+  --priority-low: oklch(0.8 0.16 155);
+
+  /* One colour per kind of task, used on task cards and the plan */
+  --cat-homework: oklch(0.72 0.17 295);
+  --cat-exam: oklch(0.72 0.19 25);
+  --cat-quiz: oklch(0.85 0.16 92);
+  --cat-lab: oklch(0.8 0.13 185);
+
+  /* The hero card and the main buttons get a thick outline and a hard shadow */
+  --sticker-border: oklch(0.96 0.015 250);
+  --sticker-shadow: oklch(0.85 0.16 92);
+  --hero: oklch(0.52 0.2 268);
+  --hero-foreground: oklch(0.99 0.005 250);
 }
 
-/* The light theme replaces the dark values above. The page picks one with data-theme on <html>. */
+/* The light theme is the main look: a sky-washed page, white cards, ink text, a cobalt primary. */
 :root[data-theme='light'] {
-  --background: oklch(0.985 0.005 275);
-  --foreground: oklch(0.22 0.04 275);
+  --background: oklch(0.965 0.022 240);
+  --foreground: oklch(0.25 0.08 265);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 275);
+  --card-foreground: oklch(0.25 0.08 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 275);
-  --primary: oklch(0.52 0.21 285);
-  --primary-foreground: oklch(0.99 0.005 275);
-  --secondary: oklch(0.95 0.015 275);
-  --secondary-foreground: oklch(0.25 0.04 275);
-  --muted: oklch(0.96 0.01 275);
-  --muted-foreground: oklch(0.48 0.03 275);
-  --accent: oklch(0.93 0.025 275);
-  --accent-foreground: oklch(0.22 0.04 275);
-  --destructive: oklch(0.55 0.22 25);
-  --border: oklch(0.89 0.015 275);
-  --input: oklch(0.89 0.015 275);
-  --ring: oklch(0.55 0.14 215);
+  --popover-foreground: oklch(0.25 0.08 265);
+  --primary: oklch(0.5 0.23 266);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.93 0.04 245);
+  --secondary-foreground: oklch(0.28 0.08 265);
+  --muted: oklch(0.94 0.028 245);
+  --muted-foreground: oklch(0.47 0.06 262);
+  --accent: oklch(0.9 0.17 95);
+  --accent-foreground: oklch(0.25 0.08 265);
+  --destructive: oklch(0.54 0.23 27);
+  --border: oklch(0.88 0.035 250);
+  --input: oklch(0.8 0.05 255);
+  --ring: oklch(0.5 0.23 266);
 
-  --chart-1: oklch(0.52 0.21 285);
-  --chart-2: oklch(0.55 0.13 215);
-  --chart-3: oklch(0.65 0.16 70);
-  --chart-4: oklch(0.55 0.2 340);
-  --chart-5: oklch(0.55 0.15 150);
+  --chart-1: oklch(0.5 0.23 266);
+  --chart-2: oklch(0.6 0.13 200);
+  --chart-3: oklch(0.78 0.17 85);
+  --chart-4: oklch(0.6 0.22 350);
+  --chart-5: oklch(0.6 0.15 155);
 
-  --priority-high: oklch(0.55 0.22 25);
-  --priority-medium: oklch(0.62 0.16 70);
-  --priority-low: oklch(0.52 0.14 160);
+  --priority-high: oklch(0.54 0.23 27);
+  --priority-medium: oklch(0.55 0.14 70);
+  --priority-low: oklch(0.5 0.14 160);
+
+  --cat-homework: oklch(0.58 0.2 295);
+  --cat-exam: oklch(0.63 0.21 28);
+  --cat-quiz: oklch(0.82 0.16 90);
+  --cat-lab: oklch(0.65 0.13 185);
+
+  --sticker-border: oklch(0.25 0.08 265);
+  --sticker-shadow: oklch(0.25 0.08 265);
+  --hero: oklch(0.5 0.23 266);
+  --hero-foreground: oklch(0.99 0.005 250);
 }
 
 @theme inline {
@@ -109,10 +132,19 @@
   --color-priority-high: var(--priority-high);
   --color-priority-medium: var(--priority-medium);
   --color-priority-low: var(--priority-low);
+
+  --color-cat-homework: var(--cat-homework);
+  --color-cat-exam: var(--cat-exam);
+  --color-cat-quiz: var(--cat-quiz);
+  --color-cat-lab: var(--cat-lab);
+  --color-sticker: var(--sticker-border);
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
 }
 
 @theme {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Bricolage Grotesque Variable', 'Figtree Variable', ui-sans-serif, sans-serif;
 }
 
 @layer base {
@@ -134,6 +166,41 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.015em;
+  }
+
+  /* Keyboard focus is always visible, in the accent colour */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* A thick outline and a hard offset shadow: used on the hero card and the main buttons only */
+  .sticker {
+    border: 2px solid var(--sticker-border);
+    box-shadow: 4px 4px 0 0 var(--sticker-shadow);
+  }
+
+  .sticker-sm {
+    border: 2px solid var(--sticker-border);
+    box-shadow: 2px 2px 0 0 var(--sticker-shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

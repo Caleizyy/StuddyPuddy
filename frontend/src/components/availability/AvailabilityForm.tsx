@@ -82,15 +82,29 @@ export function AvailabilityForm({ initial }: { initial: WeeklyHours }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Study hours per day</CardTitle>
+        <CardTitle>Your typical week</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <ul className="space-y-3">
             {SHOWN_ORDER.map((weekday) => (
               <li key={weekday} className="space-y-1">
-                <div className="flex items-center justify-between gap-4">
-                  <Label htmlFor={`hours-${weekday}`}>{WEEKDAY_NAMES[weekday]}</Label>
+                <div className="flex items-center gap-3">
+                  <Label
+                    htmlFor={`hours-${weekday}`}
+                    className="w-24 shrink-0 text-base font-semibold"
+                  >
+                    {WEEKDAY_NAMES[weekday]}
+                  </Label>
+                  {/* The bar shows the day at a glance and follows what is typed */}
+                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width]"
+                      style={{
+                        width: `${Math.min(100, ((Number.isFinite(hours[weekday]) ? hours[weekday] : 0) / 10) * 100)}%`,
+                      }}
+                    />
+                  </div>
                   <div className="flex items-center gap-2">
                     <Input
                       id={`hours-${weekday}`}
@@ -110,7 +124,7 @@ export function AvailabilityForm({ initial }: { initial: WeeklyHours }) {
             ))}
           </ul>
 
-          <p className="text-sm text-muted-foreground">Total: {weeklyTotal} h per week</p>
+          <p className="font-semibold">{weeklyTotal} h of study time in a typical week</p>
 
           <FieldError message={errors.root?.message} />
           <div className="flex items-center gap-3">

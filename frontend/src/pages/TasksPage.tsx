@@ -169,12 +169,12 @@ export function TasksPage() {
   const hoursLeft = openTasks.reduce((sum, task) => sum + remainingOf(task), 0);
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-8">
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Tasks</h1>
+          <h1 className="text-3xl font-extrabold">Tasks</h1>
           {loadState === 'ready' && tasks.length > 0 && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground">
               {filtered && `Showing ${tasks.length} of ${total} · `}
               {openTasks.length} open · {tasks.length - openTasks.length} done · {hoursLeft} h of
               work left

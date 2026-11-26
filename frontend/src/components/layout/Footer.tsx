@@ -1,7 +1,7 @@
 export function Footer() {
   return (
-    <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
-      StuddyPuddy · a study planner for students
+    <footer className="hidden border-t border-border py-6 text-center text-sm text-muted-foreground md:block">
+      StuddyPuddy: plan the work, then do it.
     </footer>
   );
 }

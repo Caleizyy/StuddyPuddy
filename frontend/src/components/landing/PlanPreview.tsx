@@ -1,71 +1,54 @@
-import { Badge } from '@/components/ui/badge';
-import { PriorityBadge } from '@/components/plan/PriorityBadge';
+import { Ripple } from '@/components/layout/Logo';
 
-// A small made-up example of the plan, so a visitor sees what the app gives them.
+// A small made-up example of today's plan, so a visitor sees what the app gives them.
 // It is static on purpose: no account and no server needed.
-const TASKS = [
-  { title: 'Programming lab', due: 'in 2 days', band: 'high' as const, hours: '3 h' },
-  { title: 'Maths exam', due: 'in 5 days', band: 'medium' as const, hours: '6 h' },
-  { title: 'History essay', due: 'in 9 days', band: 'low' as const, hours: '4 h' },
+const TODAY = [
+  { title: 'Programming lab', hours: 2, note: 'Due in 2 days', stripe: 'bg-cat-lab' },
+  { title: 'Maths exam', hours: 1, note: 'Start with: derivatives', stripe: 'bg-cat-exam' },
 ];
 
-const DAYS = [
-  { label: 'Today', items: [['Programming lab', '2 h']] },
-  {
-    label: 'Tomorrow',
-    items: [
-      ['Programming lab', '1 h'],
-      ['Maths exam', '1 h'],
-    ],
-  },
-  { label: 'Wednesday', items: [['Maths exam', '2 h']] },
+const NEXT = [
+  { label: 'Tomorrow', text: 'Programming lab 1 h, Maths exam 1 h' },
+  { label: 'Wednesday', text: 'Maths exam 2 h' },
 ];
 
 export function PlanPreview() {
   return (
     <figure
-      className="rounded-2xl bg-card p-5 text-sm ring-1 ring-foreground/10 shadow-lg"
+      className="sticker relative overflow-hidden rounded-3xl bg-hero p-6 text-hero-foreground"
       aria-label="Example of a study plan"
     >
-      <figcaption className="mb-3 flex items-center justify-between">
-        <span className="font-medium">Your plan</span>
-        <Badge variant="outline">Example</Badge>
+      <Ripple className="pointer-events-none absolute -right-8 -bottom-10 size-56 text-white opacity-10" />
+      <figcaption className="relative flex items-center justify-between">
+        <span className="font-heading text-lg font-bold">Today</span>
+        <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-bold">Example</span>
       </figcaption>
 
-      <ol className="space-y-2">
-        {TASKS.map((task, index) => (
-          <li
-            key={task.title}
-            className="flex items-center justify-between gap-2 rounded-lg bg-muted/60 px-3 py-2"
-          >
-            <span>
-              <span className="mr-2 text-muted-foreground">{index + 1}.</span>
-              {task.title}
-              <span className="ml-2 text-muted-foreground">due {task.due}</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <PriorityBadge band={task.band} />
-              <span className="whitespace-nowrap text-muted-foreground">{task.hours}</span>
-            </span>
+      <p className="relative mt-3 font-heading text-6xl leading-none font-extrabold">
+        3<span className="ml-1 text-2xl font-bold">h</span>
+      </p>
+
+      <ul className="relative mt-5 space-y-2.5">
+        {TODAY.map((task) => (
+          <li key={task.title} className="flex items-center gap-3 rounded-2xl bg-white/12 p-3">
+            <span aria-hidden className={`h-9 w-1.5 shrink-0 rounded-full ${task.stripe}`} />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{task.title}</p>
+              <p className="text-sm text-hero-foreground/80">{task.note}</p>
+            </div>
+            <span className="font-heading text-xl font-extrabold">{task.hours} h</span>
           </li>
         ))}
-      </ol>
+      </ul>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        {DAYS.map((day) => (
-          <div key={day.label} className="rounded-lg border border-border p-3">
-            <p className="mb-1 font-medium">{day.label}</p>
-            <ul className="space-y-0.5 text-muted-foreground">
-              {day.items.map(([title, hours]) => (
-                <li key={title} className="flex justify-between gap-2">
-                  <span>{title}</span>
-                  <span className="whitespace-nowrap">{hours}</span>
-                </li>
-              ))}
-            </ul>
+      <dl className="relative mt-5 space-y-1 text-sm text-hero-foreground/85">
+        {NEXT.map((day) => (
+          <div key={day.label} className="flex gap-2">
+            <dt className="w-24 shrink-0 font-bold">{day.label}</dt>
+            <dd>{day.text}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </figure>
   );
 }

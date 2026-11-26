@@ -76,8 +76,8 @@ export function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-8">
-      <h1 className="text-2xl font-semibold">Settings</h1>
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
+      <h1 className="text-3xl font-extrabold">Settings</h1>
 
       {problem && (
         <p role="alert" className="text-sm text-destructive">
@@ -126,7 +126,7 @@ export function SettingsPage() {
           <CardTitle>Planning</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border">
-          <SettingRow title="Week starts on" description="The order of the days on Availability.">
+          <SettingRow title="Week starts on" description="The order of the days on Study hours.">
             <Segmented
               label="Week starts on"
               value={preferences.weekStart}
@@ -157,7 +157,7 @@ export function SettingsPage() {
             description="The most hours the planner may give you on one day."
           >
             <Link to="/availability" className="text-sm text-primary underline">
-              Change on Availability
+              Change on Study hours
             </Link>
           </SettingRow>
         </CardContent>
