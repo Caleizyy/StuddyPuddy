@@ -3,8 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useLocation, useNavigate, Navigate } from 'react-router';
 import { ApiError } from '@/api/client';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { PasswordInput } from '@/components/auth/PasswordInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,53 +60,49 @@ export function LoginPage() {
 
   if (status === 'authenticated') return <Navigate to={requested ?? fallback} replace />;
   return (
-    <main className="mx-auto max-w-md p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Log in</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {state?.registered && (
-            <p className="mb-4 text-sm text-muted-foreground">Account created. Please log in.</p>
-          )}
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={!!errors.email}
-                {...register('email')}
-              />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={!!errors.password}
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Logging in...' : 'Log in'}
-            </Button>
-          </form>
-          <p className="mt-4 text-sm text-muted-foreground">
-            No account yet?{' '}
-            <Link to="/register" className="text-primary underline">
-              Register
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Log in to see what to study today."
+      pitch={{ heading: 'Your plan is waiting for you.', points: 'login' }}
+    >
+      {state?.registered && (
+        <p role="status" className="mb-4 rounded-lg bg-muted p-3 text-sm">
+          Account created. Log in to get started.
+        </p>
+      )}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            aria-invalid={!!errors.email}
+            {...register('email')}
+          />
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            aria-invalid={!!errors.password}
+            {...register('password')}
+          />
+          {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+        </div>
+        {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in...' : 'Log in'}
+        </Button>
+      </form>
+      <p className="mt-6 text-sm text-muted-foreground">
+        No account yet?{' '}
+        <Link to="/register" className="font-medium text-primary hover:underline">
+          Create one
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

@@ -16,3 +16,11 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   in_progress: 'In progress',
   done: 'Completed',
 };
+
+// The coloured bar on the side of a task, one colour per kind of task
+export const CATEGORY_STRIPE: Record<TaskCategory, string> = {
+  homework: 'bg-cat-homework',
+  exam: 'bg-cat-exam',
+  quiz: 'bg-cat-quiz',
+  lab: 'bg-cat-lab',
+};

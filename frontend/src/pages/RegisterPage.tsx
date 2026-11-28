@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router';
 import { ApiError } from '@/api/client';
 import { registerUser } from '@/api/auth';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { PasswordInput } from '@/components/auth/PasswordInput';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -44,60 +45,58 @@ export function RegisterPage() {
     }
   }
   return (
-    <main className="mx-auto max-w-md p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create your account</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                autoComplete="name"
-                aria-invalid={!!errors.name}
-                {...register('name')}
-              />
-              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={!!errors.email}
-                {...register('email')}
-              />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                aria-invalid={!!errors.password}
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating account...' : 'Create account'}
-            </Button>
-          </form>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary underline">
-              Log in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell
+      title="Create your account"
+      subtitle="It is free and takes under a minute."
+      pitch={{ heading: 'Know what to study, and when.', points: 'register' }}
+    >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" autoComplete="name" aria-invalid={!!errors.name} {...register('name')} />
+          {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            aria-invalid={!!errors.email}
+            {...register('email')}
+          />
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            aria-invalid={!!errors.password}
+            aria-describedby="password-hint"
+            {...register('password')}
+          />
+          {errors.password ? (
+            <p id="password-hint" className="text-sm text-destructive">
+              {errors.password.message}
+            </p>
+          ) : (
+            <p id="password-hint" className="text-sm text-muted-foreground">
+              At least 8 characters.
+            </p>
+          )}
+        </div>
+        {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating account...' : 'Create account'}
+        </Button>
+      </form>
+      <p className="mt-6 text-sm text-muted-foreground">
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium text-primary hover:underline">
+          Log in
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

@@ -115,14 +115,14 @@ export function ProfilePage() {
 
   if (failed) {
     return (
-      <main className="mx-auto max-w-3xl p-8">
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6 md:py-8">
         <ErrorState title="Could not load your profile" onRetry={load} />
       </main>
     );
   }
   if (!profile) {
     return (
-      <main className="mx-auto max-w-3xl p-8">
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6 md:py-8">
         <LoadingState label="Loading your profile..." />
       </main>
     );
@@ -135,8 +135,8 @@ export function ProfilePage() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-8">
-      <h1 className="text-2xl font-semibold">Profile</h1>
+    <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 md:py-8">
+      <h1 className="text-3xl font-semibold">Profile</h1>
 
       <Card>
         <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">

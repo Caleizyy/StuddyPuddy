@@ -29,9 +29,9 @@ function PlanContent({ plan }: { plan: Plan }) {
   return (
     <>
       {plan.settings.maxHoursPerDay !== null && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground">
           Your daily limit of {plan.settings.maxHoursPerDay} h is applied.{' '}
-          <Link to="/availability" className="text-primary underline">
+          <Link to="/availability" className="font-semibold text-primary hover:underline">
             Change it
           </Link>
         </p>
@@ -42,21 +42,21 @@ function PlanContent({ plan }: { plan: Plan }) {
       {plan.schedule.length === 0 && (
         <p className="text-sm text-muted-foreground">
           No study time is set, so nothing can be planned yet.{' '}
-          <Link to="/availability" className="text-primary underline">
+          <Link to="/availability" className="font-semibold text-primary hover:underline">
             Set your hours
           </Link>
         </p>
       )}
 
       <section aria-labelledby="priorities">
-        <h2 id="priorities" className="mb-3 text-lg font-medium">
+        <h2 id="priorities" className="mb-3 text-xl font-semibold">
           Priorities
         </h2>
         <PriorityList items={plan.items} />
       </section>
 
       <section aria-labelledby="day-by-day">
-        <h2 id="day-by-day" className="mb-3 text-lg font-medium">
+        <h2 id="day-by-day" className="mb-3 text-xl font-semibold">
           Day by day
         </h2>
         <DaySchedule plan={plan} />
@@ -69,10 +69,10 @@ export function PlanPage() {
   const { state, reload } = usePlan();
 
   return (
-    <main className="mx-auto max-w-3xl space-y-8 p-8">
+    <main className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 md:py-8">
       <div>
-        <h1 className="text-2xl font-semibold">Plan</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-3xl font-semibold">Your plan</h1>
+        <p className="mt-1 text-muted-foreground">
           What to study and when, ranked by priority. It updates whenever you change a task or your
           hours.
         </p>
